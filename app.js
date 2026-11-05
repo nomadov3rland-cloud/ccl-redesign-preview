@@ -5756,6 +5756,25 @@ const LANG_ES = {
   saversubmit: 'Continuar al formulario de fotos &rarr;',
   saversubmitnote: 'El botón se activa cuando llenas las tres líneas y marcas la casilla de permiso. El formulario pide el mismo nombre y lugar, y recibe la foto.',
   saverreview: 'Una puerta honesta: cada foto la mira una persona antes de unirse al conjunto — el lugar, la imagen y el permiso. Nada aparece automáticamente, y una foto que no es tuya para compartir nunca se publica.',
+  dirh2: 'Servicios locales — los pequeños',
+  dirintro: 'Niñeras, limpieza, manitas, cuidadores de mascotas, tutores — los negocios de una sola persona que mueven este condado, en una lista sencilla. Los locales con tienda están arriba como patrocinadores y negocios destacados; este estante es para los operadores más pequeños. Toca una categoría para acotar la lista.',
+  dirall: 'Todos los servicios',
+  dirchildcare: 'Cuidado infantil',
+  dircleaning: 'Limpieza',
+  dirhandyman: 'Manitas y reparaciones del hogar',
+  dirpets: 'Cuidado de mascotas',
+  diryard: 'Patio y jardín',
+  dirtutoring: 'Tutorías',
+  dirmoving: 'Mudanzas y fletes',
+  dirother: 'Otros servicios locales',
+  dirfounding: 'Negocio fundador',
+  dirotldesc: 'Boliche, ligas y fiestas de cumpleaños sobre Columbia River Highway.',
+  dirinviteh: 'Tu servicio aquí',
+  dirinvitep: '¿Limpias casas, cuidas niños, paseas perros, arreglas lo que se rompe? Sé uno de los primeros nombres del directorio — los anuncios son gratis mientras lanzamos.',
+  dirlistcta: 'Anuncia tu servicio &rarr;',
+  dirhonest: '<strong>Los anuncios son publicidad, no recomendaciones.</strong> No hemos verificado estos servicios — en especial para servicios dentro del hogar, pide referencias antes de contratar.',
+  dircta: 'Anuncia tu servicio — gratis durante el lanzamiento fundador &rarr;',
+  dirctanote: 'La solicitud usa el mismo formulario corto que las de patrocinadores. Cada anuncio lo lee una persona y se revisa antes de aparecer — nada se publica automáticamente y no hay pago en línea.',
   footerbyline: '<strong>Columbia County Live</strong> — por <strong>Nomad Development Group</strong>',
   footerdata: 'Datos: Servicio Meteorológico Nacional · Servicio Geológico de EE. UU. (USGS) · NOAA Tides &amp; Currents (mareas del río) · NOAA nowCOAST (radar) · NIFC WFIGS (incendios forestales) · colaboradores de adsb.fi (aviones, ODbL) · wheretheiss.at (posición de la EEI) · CelesTrak / NORAD (órbita de la EEI, para predicciones de paso) · Open-Meteo / Copernicus CAMS (modelo de calidad del aire) · Fish Passage Center y Columbia Basin Research DART (conteos de peces en las presas — datos del Cuerpo de Ingenieros del Ejército de EE. UU.) · colaboradores de OpenStreetMap. Los datos de captura (carreteras, cámaras, puente, alertas del ferry, eventos, tráfico del río) los recoge un pequeño programa recolector de los operadores oficiales — ODOT TripCheck, WSDOT, el condado de Wahkiakum y los calendarios de las ciudades y el condado — y se etiquetan con la hora en que se recogieron. El modelo de capas de rastreo en vivo está inspirado en God&rsquo;s Eye View (código abierto, de Bilawal Sidhu), cuyo DATA_SOURCES.md nos señaló varias de estas fuentes públicas.',
   footerdisc: 'Esta página reúne datos públicos por conveniencia. Antes de viajar con clima severo o agua alta, confirma las condiciones con las fuentes oficiales enlazadas arriba.',
@@ -7790,4 +7809,96 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
       setTimeout(openSaver, 350);
     }
   } catch (e) { /* no query string — the buttons still work */ }
+})();
+
+/* ============================================================
+   LOCAL SERVICES DIRECTORY — category filter (micro-business
+   tier, business plan §6 addendum, 2026-11-05). The rows are
+   static HTML in Events & More; this only shows/hides them.
+   Empty categories get a per-category honest empty state
+   (EN/ES, re-rendered on the language toggle via the same
+   langSet wrap the saver module uses). No data is fetched and
+   no listing is ever created here — listings arrive by hand
+   after the request-form review, like sponsors.
+   ============================================================ */
+(function () {
+  var wrap = document.getElementById('dir-filters');
+  var list = document.getElementById('dir-list');
+  var emptyEl = document.getElementById('dir-empty');
+  if (!wrap || !list || !emptyEl) return;
+
+  var EMPTY = {
+    childcare: {
+      en: 'No child care listings yet — the first sitter, nanny or family daycare to join is listed free during the founding launch.',
+      es: 'Aún no hay anuncios de cuidado infantil — la primera niñera o guardería familiar que se sume aparece gratis durante el lanzamiento fundador.'
+    },
+    cleaning: {
+      en: 'No cleaners listed yet. Make houses shine anywhere in this county? This is your spot — free during the founding launch.',
+      es: 'Aún no hay servicios de limpieza. ¿Dejas las casas brillando en este condado? Este es tu lugar — gratis durante el lanzamiento fundador.'
+    },
+    handyman: {
+      en: 'No handymen or repair folks yet — the first listing here is free while we launch.',
+      es: 'Aún no hay manitas ni reparadores — el primer anuncio aquí es gratis mientras lanzamos.'
+    },
+    pets: {
+      en: 'No pet sitters or groomers yet. Walk dogs or board cats around here? Claim the first spot — free during the founding launch.',
+      es: 'Aún no hay cuidadores de mascotas. ¿Paseas perros o cuidas gatos por aquí? Reclama el primer lugar — gratis durante el lanzamiento fundador.'
+    },
+    yard: {
+      en: 'No yard & garden listings yet — mowing, pruning, brush hauling. First one in is free during the founding launch.',
+      es: 'Aún no hay anuncios de patio y jardín — cortar el césped, podar, retirar ramas. El primero entra gratis durante el lanzamiento fundador.'
+    },
+    tutoring: {
+      en: 'No tutors listed yet. Math help, reading help, test prep — the first listing is free during the founding launch.',
+      es: 'Aún no hay tutores. Ayuda con matemáticas, lectura, preparación de exámenes — el primer anuncio es gratis durante el lanzamiento fundador.'
+    },
+    moving: {
+      en: 'No movers or haulers yet. Got a truck and a strong back? Be the first — free during the founding launch.',
+      es: 'Aún no hay mudanzas ni fletes. ¿Tienes una camioneta y una espalda fuerte? Sé el primero — gratis durante el lanzamiento fundador.'
+    },
+    other: {
+      en: 'Nothing else here yet — listings are free during the founding launch.',
+      es: 'Nada más por aquí todavía — los anuncios son gratis durante el lanzamiento fundador.'
+    }
+  };
+
+  var cur = 'all';
+  function renderDir() {
+    var shown = 0;
+    list.querySelectorAll('.dir-item').forEach(function (item) {
+      var cat = item.getAttribute('data-dircat');
+      var show = cur === 'all' || cat === cur;
+      item.hidden = !show;
+      if (show) shown++;
+    });
+    if (shown === 0 && EMPTY[cur]) {
+      emptyEl.textContent = EMPTY[cur][langCur === 'es' ? 'es' : 'en'];
+      emptyEl.hidden = false;
+    } else {
+      emptyEl.hidden = true;
+    }
+  }
+
+  wrap.querySelectorAll('.dir-chip').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      wrap.querySelectorAll('.dir-chip').forEach(function (x) {
+        x.classList.remove('active');
+        x.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      cur = btn.getAttribute('data-dirfilter') || 'all';
+      renderDir();
+    });
+  });
+
+  renderDir();
+
+  /* language flips re-render the JS-owned empty state (same wrap
+     pattern as the schools board, the tide glance and the saver) */
+  var langSetDirPrev = langSet;
+  langSet = function (lang) {
+    langSetDirPrev(lang);
+    renderDir();
+  };
 })();

@@ -1312,6 +1312,58 @@ h2{font-weight:700;letter-spacing:-.01em}
 .featured-event-body{margin:0;font-weight:600;font-size:.95rem}
 .featured-event-body a{color:var(--accent-dark)}
 
+/* ---------- local services directory (micro-business tier) ----------
+   Deliberately PLAIN next to the premium surfaces above: one glass
+   card, flat hairline rows inside — no photo showcase, no gold, no
+   sponsor language. The plainness IS the tier separation. */
+.dir-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.dir-chip{
+  background:var(--panel-2);color:var(--muted);border:1px solid var(--border);
+  border-radius:999px;padding:5px 12px;font-size:.82rem;cursor:pointer;
+  transition:background .15s ease,color .15s ease,border-color .15s ease;
+}
+.dir-chip:hover{color:var(--text);border-color:var(--accent)}
+.dir-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.dir-list{display:flex;flex-direction:column}
+.dir-item{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:13px 2px;border-top:1px solid var(--border);min-width:0;
+}
+.dir-item:first-child{border-top:none}
+.dir-item[hidden]{display:none}
+.dir-empty[hidden]{display:none}
+.dir-item-main{min-width:0}
+.dir-item h3{font-family:var(--display);font-size:1.06rem;margin:0;line-height:1.25}
+.dir-badge{
+  display:inline-block;vertical-align:2px;margin-left:6px;padding:2px 8px;
+  background:var(--warm-fill);color:#42250a;border-radius:999px;
+  font-family:var(--sans);font-size:.62rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;
+}
+.dir-meta{margin:3px 0 2px;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warm)}
+.dir-desc{margin:0;font-size:.9rem;color:var(--muted)}
+.dir-contact{display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right;flex-shrink:0}
+.dir-call{font-weight:700;color:var(--accent-dark);text-decoration:none;white-space:nowrap}
+.dir-call:hover{text-decoration:underline}
+.dir-addr{font-size:.78rem;color:var(--muted)}
+.dir-item.dir-invite{
+  border:1px dashed var(--warm);border-radius:12px;padding:13px 12px;margin-top:10px;
+  background:rgba(233,164,74,.10);
+}
+html[data-theme="dark"] .dir-item.dir-invite{background:rgba(233,164,74,.08)}
+.dir-empty{
+  margin:6px 0 2px;padding:12px 14px;border-radius:12px;
+  background:var(--panel-2);color:var(--muted);font-size:.9rem;
+}
+html[data-theme="dark"] .dir-empty{background:rgba(240,234,214,.08)}
+.dir-honest{margin-top:14px}
+.dir-actions{margin-top:10px}
+.dir-actions .share-btn{display:inline-block;text-decoration:none}
+@media (max-width:640px){
+  .dir-item{flex-direction:column;align-items:flex-start;gap:6px}
+  .dir-contact{align-items:flex-start;text-align:left}
+}
+
 /* ---------- photo bands on photo-less cards (light frost chip zone) ---------- */
 .band-card{padding-top:0;overflow:hidden}
 .card-band{position:relative;margin:0 -20px 14px;height:84px;overflow:hidden;background:#ddd5ba}

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>Columbia County Live — Roads, Rivers, Weather &amp; Ferry for Columbia County, Oregon</title>
 <meta name="description" content="One live map for Columbia County, Oregon: US-30 and Lewis & Clark Bridge status, Columbia & Nehalem river levels, weather alerts, earthquakes, wildfires, aircraft and river traffic overhead and under way, the Oscar B ferry, events, and town forecasts. Free, from official public sources.">
 <meta property="og:type" content="website">
@@ -716,6 +717,59 @@ document.documentElement.setAttribute("data-theme",t);})();
       <p>Markets, games, bazaars and boats — everything on the county&rsquo;s calendars for the next few days, in one list.</p>
       <a class="founding-cta alt" href="#events-card">See what&rsquo;s on &rarr;</a>
     </article>
+  </div>
+</section>
+
+<!-- Micro-business directory (business plan §6 Phase 2 addendum,
+     2026-11-05): the tier BELOW sponsors and featured — plain list
+     rows for the county's one-person services, deliberately plainer
+     than the premium glass cards above it. Founding listings are
+     free while the directory fills; NO price is shown for this tier
+     until Travis approves the proposed one. Requests ride the same
+     sponsor request form (review, then publish — no checkout). -->
+<section class="card services-card" id="services-card" aria-label="Local services directory — small and one-person local services">
+  <div class="card-head">
+    <img class="card-ico" src="img/icons/icon-search.png" alt="" aria-hidden="true"><h2 data-i18n="dirh2">Local services — the little guys</h2>
+  </div>
+  <p class="card-note" data-i18n="dirintro">Babysitters, cleaners, handymen, pet sitters, tutors — the one-person businesses this county runs on, in one plain list. The storefronts sit up top as sponsors and featured businesses; this shelf is for the smallest operators. Tap a category to narrow it down.</p>
+  <div class="dir-filters" id="dir-filters" role="group" aria-label="Filter local services by category">
+    <button class="dir-chip active" type="button" data-dirfilter="all" aria-pressed="true" data-i18n="dirall">All services</button>
+    <button class="dir-chip" type="button" data-dirfilter="childcare" aria-pressed="false" data-i18n="dirchildcare">Child care</button>
+    <button class="dir-chip" type="button" data-dirfilter="cleaning" aria-pressed="false" data-i18n="dircleaning">Cleaning</button>
+    <button class="dir-chip" type="button" data-dirfilter="handyman" aria-pressed="false" data-i18n="dirhandyman">Handyman &amp; home repair</button>
+    <button class="dir-chip" type="button" data-dirfilter="pets" aria-pressed="false" data-i18n="dirpets">Pet care</button>
+    <button class="dir-chip" type="button" data-dirfilter="yard" aria-pressed="false" data-i18n="diryard">Yard &amp; garden</button>
+    <button class="dir-chip" type="button" data-dirfilter="tutoring" aria-pressed="false" data-i18n="dirtutoring">Tutoring</button>
+    <button class="dir-chip" type="button" data-dirfilter="moving" aria-pressed="false" data-i18n="dirmoving">Moving &amp; hauling</button>
+    <button class="dir-chip" type="button" data-dirfilter="other" aria-pressed="false" data-i18n="dirother">Other local services</button>
+  </div>
+  <div class="dir-list" id="dir-list">
+    <article class="dir-item" data-dircat="other">
+      <div class="dir-item-main">
+        <h3>Oregon Trail Lanes <span class="dir-badge" data-i18n="dirfounding">Founding business</span></h3>
+        <p class="dir-meta">St. Helens &middot; <span data-i18n="dirother">Other local services</span></p>
+        <p class="dir-desc" data-i18n="dirotldesc">Bowling, leagues and birthday parties on Columbia River Highway.</p>
+      </div>
+      <div class="dir-contact">
+        <a class="dir-call" href="tel:+15033971011">&#128222; (503) 397-1011</a>
+        <span class="dir-addr">735 S Columbia River Hwy</span>
+      </div>
+    </article>
+    <article class="dir-item dir-invite" data-dircat="invite">
+      <div class="dir-item-main">
+        <h3 data-i18n="dirinviteh">Your service here</h3>
+        <p class="dir-desc" data-i18n="dirinvitep">Clean houses, watch kids, walk dogs, fix what&rsquo;s broken? Be one of the first names in the directory — listings are free while we launch.</p>
+      </div>
+      <div class="dir-contact">
+        <a class="dir-call" href="https://forms.gle/D4poEqfu1ogoMr4r6" target="_blank" rel="noopener" data-i18n="dirlistcta">List your service &rarr;</a>
+      </div>
+    </article>
+  </div>
+  <p class="dir-empty" id="dir-empty" hidden></p>
+  <p class="card-note small dir-honest" data-i18n="dirhonest"><strong>Listings are advertisements, not endorsements.</strong> We haven&rsquo;t vetted these services — for in-home services especially, check references before you book.</p>
+  <div class="dir-actions">
+    <a class="share-btn primary" href="https://forms.gle/D4poEqfu1ogoMr4r6" target="_blank" rel="noopener" data-i18n="dircta">List your service — free during the founding launch &rarr;</a>
+    <p class="card-note small" data-i18n="dirctanote">The request rides the same short form as sponsor requests. Every listing is read by a person and checked before it appears — nothing posts automatically, and there&rsquo;s no online payment.</p>
   </div>
 </section>
 

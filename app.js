@@ -7442,12 +7442,12 @@ langSet = function (lang) {
    per entry, each shown with its credit line. Seeded with verified
    site photographs marked "starter". COMMUNITY SUBMISSIONS NEVER
    WRITE TO THAT FILE: they go to the photo form (PHOTO_FORM_URL
-   below — a PLACEHOLDER until the live step creates the real Google
-   Form, mirroring how SPONSOR_FORM_URL was swapped in at v20), land
+   below — the live Google Form, swapped in on 2026-11-05,
+   mirroring how SPONSOR_FORM_URL was swapped in at v20), land
    in the form inbox, pass a human review, and only then get added to
    the JSON by hand. The review gate is the feature's load-bearing
    wall, not a detail. */
-const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEHOLDER — REMAINING LIVE STEP (v5): create the real photo Google Form in the signed-in browser (name / where taken / photo upload / rights checkbox, mirroring the sponsor form) and swap this constant; a Forms-API create cannot carry the file-upload question, so it is a browser job, not a code job
+const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05 — the real photo Google Form (name / where taken / photo upload / rights checkbox, mirroring the sponsor form)
 (function initSaver() {
   var overlay = document.getElementById('saver-overlay');
   if (!overlay) return;

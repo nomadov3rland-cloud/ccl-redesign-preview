@@ -2085,4 +2085,5 @@ html[data-theme="dark"] .drawer-photo-line{color:#d8dfc8}
 
 /* --- saver: long event names wrap instead of ellipsizing (fix 7) --- */
 .saver-answer-val{-webkit-line-clamp:3}
-.saver-answer-val.long{font-size:clamp(1.02rem,2.3vw,1.55rem);line-height:1.16}
+.saver-answer-val.long{font-size:clamp(1.02rem,2.3vw,1.55rem);line-height:1.16;-webkit-line-clamp:4}
+.saver-answer-val.xlong{font-size:clamp(.92rem,1.9vw,1.28rem);line-height:1.14;-webkit-line-clamp:5}

@@ -7662,7 +7662,7 @@ const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEH
       var v = a.val();
       return '<div class="saver-answer">'
         + '<div class="saver-answer-label"><img src="' + a.icon + '" alt="" aria-hidden="true"> ' + esc(a.label()) + '</div>'
-        + '<div class="saver-answer-val' + (v && v.length > 24 ? ' long' : '') + '">' + esc(v || '—') + '</div>'
+        + '<div class="saver-answer-val' + (v && v.length > 56 ? ' xlong' : v && v.length > 24 ? ' long' : '') + '">' + esc(v || '—') + '</div>'
         + (a.sub() ? '<div class="saver-answer-sub">' + esc(a.sub()) + '</div>' : '')
         + '</div>';
     }).join('');

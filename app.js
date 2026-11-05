@@ -3055,6 +3055,44 @@ function initShare() {
   }
 }
 
+/* ---------- the ONE install card (v5, PWA finish) ----------
+   The browser's install offer is captured at the top of this file's
+   share module (beforeinstallprompt → deferredInstallPrompt). This
+   card — in Events & More, the share bar's home — is the single
+   proactive surface for it: it appears only when an install is
+   actually on offer, the page isn't already running installed, and
+   the visitor hasn't dismissed it (the dismissal is remembered in
+   localStorage). The share bar's Add-to-home-screen button keeps its
+   manual instructions for browsers that never fire the event. */
+const INSTALL_DISMISS_KEY = 'ccl-install-dismissed-v1';
+function initInstallCard() {
+  const card = $('install-card');
+  if (!card) return;
+  let dismissed = false;
+  try { dismissed = !!window.localStorage.getItem(INSTALL_DISMISS_KEY); } catch (e) { /* session-only */ }
+  const standalone = !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  function maybeShow() {
+    if (dismissed || standalone || !deferredInstallPrompt) return;
+    card.hidden = false;
+  }
+  window.addEventListener('beforeinstallprompt', () => setTimeout(maybeShow, 600));
+  window.addEventListener('appinstalled', () => { card.hidden = true; });
+  const go = $('install-card-btn');
+  if (go) go.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    try { await deferredInstallPrompt.userChoice; } catch (e) { /* ignore */ }
+    deferredInstallPrompt = null;
+    card.hidden = true;
+  });
+  const dis = $('install-card-dismiss');
+  if (dis) dis.addEventListener('click', () => {
+    card.hidden = true;
+    try { window.localStorage.setItem(INSTALL_DISMISS_KEY, '1'); } catch (e) { /* session-only */ }
+  });
+  maybeShow();
+}
+
 /* ---------- freshness board ---------- */
 const FRESH_ROWS = [
   ['National Weather Service — alerts', 'alerts-updated', 'live'],
@@ -3099,6 +3137,7 @@ initMap();
 initMapTools();
 initTownPicker();
 initShare();
+initInstallCard();
 initEventFilters();
 initSkyFilters();
 loadGlance();
@@ -5720,7 +5759,49 @@ const LANG_ES = {
   footerbyline: '<strong>Columbia County Live</strong> — por <strong>Nomad Development Group</strong>',
   footerdata: 'Datos: Servicio Meteorológico Nacional · Servicio Geológico de EE. UU. (USGS) · NOAA Tides &amp; Currents (mareas del río) · NOAA nowCOAST (radar) · NIFC WFIGS (incendios forestales) · colaboradores de adsb.fi (aviones, ODbL) · wheretheiss.at (posición de la EEI) · CelesTrak / NORAD (órbita de la EEI, para predicciones de paso) · Open-Meteo / Copernicus CAMS (modelo de calidad del aire) · Fish Passage Center y Columbia Basin Research DART (conteos de peces en las presas — datos del Cuerpo de Ingenieros del Ejército de EE. UU.) · colaboradores de OpenStreetMap. Los datos de captura (carreteras, cámaras, puente, alertas del ferry, eventos, tráfico del río) los recoge un pequeño programa recolector de los operadores oficiales — ODOT TripCheck, WSDOT, el condado de Wahkiakum y los calendarios de las ciudades y el condado — y se etiquetan con la hora en que se recogieron. El modelo de capas de rastreo en vivo está inspirado en God&rsquo;s Eye View (código abierto, de Bilawal Sidhu), cuyo DATA_SOURCES.md nos señaló varias de estas fuentes públicas.',
   footerdisc: 'Esta página reúne datos públicos por conveniencia. Antes de viajar con clima severo o agua alta, confirma las condiciones con las fuentes oficiales enlazadas arriba.',
-  langnote: "🌎 This page is showing its headings, buttons and notes in Spanish — tap <strong>English</strong> up top, beside the clock, to switch back. Live readings, alerts and event listings keep arriving in English from their official sources."
+  pinsh2: '📌 Tus fijadas',
+  pinsclear: 'Desfijar todo',
+  pinsnote: 'Las tarjetas que fijaste, aquí arriba en el orden en que las fijaste — copias en vivo que se actualizan cuando cambian las lecturas, mientras las originales se quedan donde pertenecen. Toca una copia para saltar a la tarjeta real; toca su botón <strong>📌 Fijada</strong> para desfijarla.',
+  installh2: 'Pon Columbia County Live en tu pantalla de inicio',
+  installp: 'Instalada, se abre en pantalla completa como una app — sin barra de direcciones, con su propio ícono y el condado a un toque. Gratis, y se sigue actualizando todo el día.',
+  installcardbtn: '📱 Instalar la app',
+  dwcommute: 'El veredicto del viaje',
+  dwgo: 'Antes de salir',
+  dwplan: 'Esta noche y mañana',
+  dwschools: 'Escuelas — cierres y retrasos',
+  dwbriefing: 'El Resumen del Condado',
+  dwhome: 'Hazlo tuyo',
+  dwmap: 'El mapa en vivo',
+  dwroads: 'Carreteras y el puente',
+  dwrouteahead: 'Ruta por delante',
+  dwferry: 'El ferry Oscar B',
+  dwships: 'Tráfico del río',
+  dwaircraft: 'Aviones sobre el condado',
+  dwbend: 'El viaje a Bend',
+  dwalerts: 'Alertas del clima',
+  dwforecast: 'Pronóstico',
+  dwsky: 'El cielo y la estación espacial',
+  dwdark: 'Al anochecer',
+  dwrivers: 'Niveles del río',
+  dwtides: 'Mareas del río',
+  dwfishpick: 'Pesca — ¿vale la pena ir?',
+  dwfish: 'Conteos de peces',
+  dwtracker: 'Rastreador de salmones',
+  dwsteelhead: 'Steelhead',
+  dwalmanac: 'El Almanaque',
+  dwquakes: 'Terremotos',
+  dwfires: 'Incendios forestales',
+  dwair: 'Aire y humo',
+  dwevents: 'Eventos',
+  dwfeatured: 'Negocios destacados',
+  dwwatch: 'La Vigilancia del Condado',
+  dwsaver: 'Protector de pantalla de la comunidad',
+  dwfresh: '¿Qué tan fresca es esta página?',
+  dwabout: 'Acerca de',
+  dwbecome: 'Hazte patrocinador',
+  dwphototitle: 'Comparte tu foto del condado',
+  dwphotoline: '¿Tienes una foto del condado que te encanta? Envíala — las buenas se unen al protector de pantalla de la comunidad, con tu nombre firmado como en una pintura.',
+  langnote: "🌎 This page is showing its headings, buttons and notes in Spanish — tap the courthouse logo up top to open the menu, then tap <strong>English</strong> to switch back. Live readings, alerts and event listings keep arriving in English from their official sources."
 };
 let langCur = 'en';
 let langEls = null;
@@ -6185,77 +6266,172 @@ function initGo() {
 }
 initGo();
 
-/* ---------- Your front page: pin the cards you live by (X20 R18) ----------
-   Twenty-six rounds deep, the page's order was the page's opinion: nine
-   sections before the map, two columns after it, and every visitor read
-   the same front page whether they came for the ferry, the river, or the
-   sky. This module hands the order over. Every content card grows a
-   📌 Pin button in its head; a pinned card's live node is *moved* (never
-   cloned — the panels keep updating in place) into the front-page strip
-   under the glance, in pin order; unpinning returns it to the exact slot
-   it came from, recorded before anything moved. Pins persist only in the
-   visitor's browser (ccl-frontpage-v1, beside the home-town and watch
-   prefs). The map card is deliberately not pinnable: it is the page's
-   anchor, and a Leaflet container does not need the adventure. */
-const FPAGE_KEY = 'ccl-frontpage-v1';
-const FPAGE_CARDS = ['since-card', 'watch-card', 'briefing-card', 'plan-card', 'go-card', 'almanac-card',
-  'roads-card', 'ships-card', 'ferry-card', 'events-card',
-  'alerts-card', 'forecast-card', 'sky-card', 'rivers-card', 'tides-card', 'quakes-card', 'fires-card', 'air-card'];
-let fpagePins = [];        // pinned card ids, in the order they were pinned
-const fpageHomes = {};     // id -> {parent, next} recorded at init, before any move
-const fpageBtns = {};      // id -> its pin button
-function fpageParent(el) { return el ? (el.parentNode || el.parent || null) : null; }
-function fpageLoadPref() {
-  try {
-    const v = JSON.parse(window.localStorage.getItem(FPAGE_KEY) || '[]');
-    if (Array.isArray(v)) fpagePins = v.filter(id => FPAGE_CARDS.indexOf(id) !== -1);
-  } catch (e) { fpagePins = []; }
+/* ---------- the GENERIC pin store (window.CCLPins) ----------
+   One stored object for every kind of pin on the site:
+     { cards:   [card ids, in pin order],
+       answers: [screensaver answer ids, in pin order] }
+   persisted at localStorage 'ccl-pins-v1' and exposed as
+   window.CCLPins so every renderer — the pinned-cards zone at the
+   top of Today and the community screensaver — reads and writes the
+   SAME list. Changes broadcast a 'ccl-pins-changed' document event.
+   Migration, one-way and read-only toward the older keys: a first
+   load with no generic store seeds answers from the saver's
+   prototype key (ccl-saver-pins-v1) if present, and seeds cards
+   from the front-page system's original store (ccl-frontpage-v1).
+   (Moved out of the screensaver module in the v5 pass: the pins
+   zone at the top of Today loads earlier in this file than the
+   saver does, and both must share the one store.) */
+const CCL_PINS_KEY = 'ccl-pins-v1';
+const CCL_ANSWER_IDS = ['bridge', 'tides', 'weather', 'events', 'ferry'];
+const cclPinStore = { cards: [], answers: null };
+function cclPinStoreSave() {
+  try { window.localStorage.setItem(CCL_PINS_KEY, JSON.stringify(cclPinStore)); } catch (e) { /* session-only */ }
+  try { document.dispatchEvent(new CustomEvent('ccl-pins-changed', { detail: { cards: cclPinStore.cards.slice(), answers: (cclPinStore.answers || []).slice() } })); } catch (e) { /* older browser — renderers poll instead */ }
 }
-function fpageSavePref() {
-  try {
-    if (fpagePins.length) window.localStorage.setItem(FPAGE_KEY, JSON.stringify(fpagePins));
-    else window.localStorage.removeItem(FPAGE_KEY);
-  } catch (e) { /* storage unavailable — pins still work for this visit */ }
+(function cclPinStoreLoad() {
+  let v = null;
+  try { v = JSON.parse(window.localStorage.getItem(CCL_PINS_KEY) || 'null'); } catch (e) { /* unreadable */ }
+  if (v && typeof v === 'object') {
+    if (Array.isArray(v.cards)) cclPinStore.cards = v.cards.filter(x => typeof x === 'string');
+    if (Array.isArray(v.answers)) cclPinStore.answers = v.answers.filter(id => CCL_ANSWER_IDS.indexOf(id) !== -1);
+  }
+  if (!cclPinStore.answers) {
+    let legacy = null;
+    try { legacy = JSON.parse(window.localStorage.getItem('ccl-saver-pins-v1') || 'null'); } catch (e) { /* none */ }
+    cclPinStore.answers = Array.isArray(legacy)
+      ? legacy.filter(id => CCL_ANSWER_IDS.indexOf(id) !== -1)
+      : ['bridge', 'tides', 'weather', 'events'];
+  }
+  if (!cclPinStore.cards.length) {
+    let fp = null;
+    try { fp = JSON.parse(window.localStorage.getItem('ccl-frontpage-v1') || 'null'); } catch (e) { /* none */ }
+    if (Array.isArray(fp)) cclPinStore.cards = fp.filter(x => typeof x === 'string');
+  }
+})();
+window.CCLPins = {
+  key: CCL_PINS_KEY,
+  all: function () { return { cards: cclPinStore.cards.slice(), answers: cclPinStore.answers.slice() }; },
+  has: function (kind, id) { const l = kind === 'cards' ? cclPinStore.cards : cclPinStore.answers; return l.indexOf(id) !== -1; },
+  toggle: function (kind, id) {
+    const l = kind === 'cards' ? cclPinStore.cards : cclPinStore.answers;
+    const i = l.indexOf(id);
+    if (i !== -1) l.splice(i, 1); else l.push(id);
+    cclPinStoreSave();
+    return l.slice();
+  },
+  _store: cclPinStore,
+  _save: cclPinStoreSave
+};
+
+/* ---------- Your pins: pin any card to the top of Today (v5) ----------
+   Travis's direction, unified in v5 onto the ONE generic store
+   above (window.CCLPins, localStorage ccl-pins-v1 — the screensaver's
+   answers live in the same object). Every content card in every view
+   grows a 📌 Pin button in its head. A pinned card renders at the top
+   of the Today view as a LIVE COPY — a mirror that re-renders as the
+   original's readings change — in pin order, inside the "Your pins"
+   zone (hidden while empty). The original NEVER moves: pins are
+   shortcuts, not moves (this replaces the X20 front-page system,
+   which physically moved the node and kept its own store;
+   ccl-frontpage-v1 survives only as the store's one-way seed).
+   Unpinning works from the original's button and from the copy's.
+   Tapping a copy (anywhere but its unpin button) jumps to the real
+   card in its home view. The map card is deliberately not pinnable:
+   it is the page's anchor, and a Leaflet container does not need the
+   adventure. */
+const PIN_CARDS = ['since-card', 'home-card', 'commute-card', 'go-card', 'plan-card', 'schools-card', 'briefing-card',
+  'roads-card', 'routeahead-card', 'ferry-card', 'ships-card', 'aircraft-card', 'bend-card',
+  'alerts-card', 'forecast-card', 'sky-card', 'dark-card', 'rivers-card', 'tides-card',
+  'fishpick-card', 'fish-card', 'tracker-card', 'steelhead-card', 'almanac-card',
+  'quakes-card', 'fires-card', 'air-card',
+  'events-card', 'freshness-card', 'watch-card', 'saver-card', 'about-card'];
+const pinBtns = {};        // card id -> its pin button on the ORIGINAL card
+const pinObservers = {};   // card id -> MutationObserver mirroring it into its copy
+function pinLabel(on) {
+  if (langCur === 'es') return on ? '📌 Fijada' : '📌 Fijar';
+  return on ? '📌 Pinned' : '📌 Pin';
 }
-function fpagePaint() {
-  const wrap = $('frontpage');
-  if (wrap) wrap.hidden = fpagePins.length === 0;
-  FPAGE_CARDS.forEach(id => {
-    const b = fpageBtns[id];
+function pinPaint() {
+  PIN_CARDS.forEach(id => {
+    const b = pinBtns[id];
     if (!b) return;
-    const on = fpagePins.indexOf(id) !== -1;
+    const on = window.CCLPins.has('cards', id);
     b.classList.toggle('active', on);
-    b.textContent = on ? '📌 Pinned' : '📌 Pin';
-    b.title = on ? 'Send this card back where it came from' : 'Pin this card to your front page, up top';
-    if (b.setAttribute) b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.textContent = pinLabel(on);
+    b.title = on ? 'Unpin this card from the top of Today' : 'Pin this card to the top of Today';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
 }
-function fpagePin(id) {
-  const card = $(id), list = $('frontpage-list');
-  if (!card || !list) return;
-  list.appendChild(card); // appendChild moves the live node — panels keep updating in their new home
-  if (fpagePins.indexOf(id) === -1) fpagePins.push(id);
+function pinMakeCopy(id) {
+  const orig = $(id);
+  if (!orig) return null;
+  const copy = orig.cloneNode(true);
+  copy.removeAttribute('id');
+  copy.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+  copy.classList.add('pin-copy');
+  copy.classList.remove('reveal');
+  copy.classList.add('inview');
+  copy.setAttribute('data-pin-copy', id);
+  copy.setAttribute('aria-label', (orig.getAttribute('aria-label') || 'Card') + ' — pinned copy');
+  const tag = document.createElement('div');
+  tag.className = 'pin-copy-tag';
+  tag.textContent = langCur === 'es' ? '📌 Copia fijada — toca para abrir la tarjeta en vivo' : '📌 Pinned copy — tap to open the live card';
+  copy.insertBefore(tag, copy.firstChild);
+  const head = copy.querySelector('.card-head');
+  if (head) {
+    const stale = head.querySelector('.pin-btn');
+    if (stale) stale.remove();
+    head.classList.add('has-pin');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pin-btn active';
+    b.textContent = pinLabel(true);
+    b.title = 'Unpin this card from the top of Today';
+    b.setAttribute('aria-pressed', 'true');
+    b.addEventListener('click', ev => {
+      ev.preventDefault(); ev.stopPropagation();
+      window.CCLPins.toggle('cards', id);
+    });
+    head.appendChild(b);
+  }
+  copy.addEventListener('click', ev => {
+    if (ev.target && ev.target.closest && ev.target.closest('.pin-btn')) return; // the unpin button handles itself
+    ev.preventDefault(); ev.stopPropagation();
+    cclRouteAnchor({ getAttribute: () => '#' + id });
+  }, true);
+  return copy;
 }
-function fpageUnpin(id) {
-  const card = $(id), home = fpageHomes[id];
-  fpagePins = fpagePins.filter(x => x !== id);
-  if (!card || !home || !home.parent) return;
-  const anchor = home.next && fpageParent(home.next) === home.parent ? home.next : null;
-  if (anchor) home.parent.insertBefore(card, anchor);
-  else home.parent.appendChild(card);
+function pinRenderZone() {
+  const wrap = $('frontpage'), list = $('frontpage-list');
+  if (!wrap || !list) return;
+  const ids = window.CCLPins.all().cards.filter(id => PIN_CARDS.indexOf(id) !== -1 && $(id));
+  wrap.hidden = ids.length === 0;
+  list.innerHTML = '';
+  Object.keys(pinObservers).forEach(id => { pinObservers[id].disconnect(); delete pinObservers[id]; });
+  ids.forEach(id => {
+    const copy = pinMakeCopy(id);
+    if (!copy) return;
+    list.appendChild(copy);
+    const orig = $(id);
+    let t = null;
+    const mo = new MutationObserver(() => {
+      if (t) return;
+      t = setTimeout(() => {
+        t = null;
+        const cur = list.querySelector('[data-pin-copy="' + id + '"]');
+        if (!cur) return;
+        const fresh = pinMakeCopy(id);
+        if (fresh) cur.replaceWith(fresh);
+      }, 400);
+    });
+    mo.observe(orig, { subtree: true, childList: true, characterData: true });
+    pinObservers[id] = mo;
+  });
 }
-function fpageToggle(id) {
-  if (fpagePins.indexOf(id) !== -1) fpageUnpin(id); else fpagePin(id);
-  fpageSavePref();
-  fpagePaint();
-}
-function initFrontpage() {
-  const list = $('frontpage-list');
-  if (!list) return;
-  FPAGE_CARDS.forEach(id => {
+function initPins() {
+  PIN_CARDS.forEach(id => {
     const card = $(id);
     if (!card) return;
-    fpageHomes[id] = { parent: fpageParent(card), next: card.nextElementSibling || null };
     const head = card.querySelector('.card-head');
     if (!head) return;
     head.classList.add('has-pin');
@@ -6263,23 +6439,19 @@ function initFrontpage() {
     b.type = 'button';
     b.className = 'pin-btn';
     b.dataset.pinFor = id;
-    b.addEventListener('click', () => fpageToggle(id));
+    b.addEventListener('click', () => window.CCLPins.toggle('cards', id));
     head.appendChild(b);
-    fpageBtns[id] = b;
+    pinBtns[id] = b;
   });
-  fpageLoadPref();
-  fpagePins = fpagePins.filter(id => fpageHomes[id]); // forget pins whose cards are gone
-  fpagePins.forEach(id => { const c = $(id); if (c) list.appendChild(c); });
   const clear = $('frontpage-clear');
   if (clear) clear.addEventListener('click', () => {
-    fpagePins.slice().forEach(id => fpageUnpin(id));
-    fpagePins = [];
-    fpageSavePref();
-    fpagePaint();
+    window.CCLPins.all().cards.slice().forEach(id => window.CCLPins.toggle('cards', id));
   });
-  fpagePaint();
+  document.addEventListener('ccl-pins-changed', () => { pinPaint(); pinRenderZone(); });
+  pinPaint();
+  pinRenderZone();
 }
-initFrontpage();
+initPins();
 
 /* ---------- the county sheet: the page learns to print ----------
    X20 Round 19. Twenty-seven changes in, every way this page travels is
@@ -6782,6 +6954,66 @@ function initViews() {
 }
 initViews();
 
+/* ---------- the drawer (v5): the logo opens a slide-out menu ----------
+   Travis's clean-hero trade: the hero's six quick-nav chips retired,
+   and every jump they carried — plus every other section on the page —
+   now lives here. The courthouse logo in the masthead is the button
+   (hamburger badge on the mark). The drawer slides in from the RIGHT
+   over a dimmed backdrop, frosted glass in both themes, and closes on
+   the backdrop, on Esc, on its ✕, or on any selection. Section links
+   are plain in-page anchors, so initViews' router already switches
+   the view and scrolls them home; this module only adds the closing.
+   The drawer's own chrome strings ride the same data-i18n / LANG_ES
+   system as the rest of the page. */
+function initDrawer() {
+  const drawer = $('drawer'), backdrop = $('drawer-backdrop'),
+        openBtn = $('menu-btn'), closeBtn = $('drawer-close');
+  if (!drawer || !openBtn) return;
+  let lastFocus = null;
+  function openDrawer() {
+    lastFocus = document.activeElement;
+    drawer.hidden = false;
+    if (backdrop) backdrop.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      drawer.classList.add('open');
+      if (backdrop) backdrop.classList.add('open');
+    }));
+    document.body.classList.add('drawer-on');
+    openBtn.setAttribute('aria-expanded', 'true');
+    if (closeBtn) closeBtn.focus();
+  }
+  function closeDrawer() {
+    if (drawer.hidden) return;
+    drawer.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.classList.remove('drawer-on');
+    openBtn.setAttribute('aria-expanded', 'false');
+    setTimeout(() => { drawer.hidden = true; if (backdrop) backdrop.hidden = true; }, 320);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  openBtn.addEventListener('click', openDrawer);
+  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+  if (backdrop) backdrop.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape') closeDrawer();
+  });
+  drawer.querySelectorAll('.drawer-link, .drawer-action[href^="#"]').forEach(a =>
+    a.addEventListener('click', () => closeDrawer()));
+  drawer.querySelectorAll('[data-drawer-view]').forEach(b =>
+    b.addEventListener('click', () => {
+      closeDrawer();
+      cclShowView(b.dataset ? b.dataset.drawerView : null);
+      if (window.scrollTo) { try { window.scrollTo(0, 0); } catch (e) { /* noop */ } }
+    }));
+  const saverBtn = $('drawer-saver-btn');
+  if (saverBtn) saverBtn.addEventListener('click', () => {
+    closeDrawer();
+    if (window.CCLOpenSaver) window.CCLOpenSaver();
+    else { const sb = $('saver-start-btn'); if (sb) sb.click(); }
+  });
+}
+initDrawer();
+
 /* ---------- reveal-on-first-sight (Redesign 2026-11-04) ----------
    Cards rise and fade in the first time they scroll into view — motion
    that helps the eye land, nothing more. The hidden start state is added
@@ -7201,11 +7433,10 @@ langSet = function (lang) {
    directed that pinned CARDS will also render at the top of the
    Today view (the base site's front-page system already moves
    pinned cards there; the next pass unifies its toggles onto this
-   store and reads store.cards). This module owns the answers half;
-   with no stored choice the answers default to the four glance
-   answers. Card heads deliberately carry NO saver pins: they
-   already hold the front-page pin system, and two pin systems on
-   one card head would collide.
+   store and reads store.cards). This module owns the answers half.
+   Card heads carry the unified card pins (v5) — never saver pins —
+   and the strip/chips here carry the answer pins, so the two halves
+   of the one store never collide on the same control.
 
    Photo pool: data/community-photos.json — { src, credit, location }
    per entry, each shown with its credit line. Seeded with verified
@@ -7216,7 +7447,7 @@ langSet = function (lang) {
    in the form inbox, pass a human review, and only then get added to
    the JSON by hand. The review gate is the feature's load-bearing
    wall, not a detail. */
-const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEHOLDER — live step: create the real photo Google Form and swap this constant
+const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEHOLDER — REMAINING LIVE STEP (v5): create the real photo Google Form in the signed-in browser (name / where taken / photo upload / rights checkbox, mirroring the sponsor form) and swap this constant; a Forms-API create cannot carry the file-upload question, so it is a browser job, not a code job
 (function initSaver() {
   var overlay = document.getElementById('saver-overlay');
   if (!overlay) return;
@@ -7292,60 +7523,15 @@ const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEH
   var ANSWER_IDS = ANSWERS.map(function (a) { return a.id; });
 
   /* ----- pins: the GENERIC pin store -----
-     One stored object for every kind of pin on the site:
-       { cards:   [card ids, in pin order],
-         answers: [saver answer ids, in pin order] }
-     persisted at localStorage 'ccl-pins-v1' and exposed as
-     window.CCLPins so any renderer — this saver today, the
-     pinned-cards-at-the-top-of-Today renderer next — reads and
-     writes the same list. Changes broadcast a 'ccl-pins-changed'
-     document event. Migration, one-way and read-only toward the
-     older keys: a first load with no generic store seeds answers
-     from the saver's prototype key (ccl-saver-pins-v1) if present,
-     and seeds cards from the front-page system's store
-     (ccl-frontpage-v1) so its existing pins are already here when
-     its toggles unify onto this store. */
-  var PINS_KEY = 'ccl-pins-v1';
-  var pinStore = { cards: [], answers: null };
-  function pinStoreSave() {
-    try { window.localStorage.setItem(PINS_KEY, JSON.stringify(pinStore)); } catch (e) { /* session-only */ }
-    try { document.dispatchEvent(new CustomEvent('ccl-pins-changed', { detail: { cards: pinStore.cards.slice(), answers: (pinStore.answers || []).slice() } })); } catch (e) { /* older browser — renderers poll instead */ }
-  }
-  (function pinStoreLoad() {
-    var v = null;
-    try { v = JSON.parse(window.localStorage.getItem(PINS_KEY) || 'null'); } catch (e) { /* unreadable */ }
-    if (v && typeof v === 'object') {
-      if (Array.isArray(v.cards)) pinStore.cards = v.cards.filter(function (x) { return typeof x === 'string'; });
-      if (Array.isArray(v.answers)) pinStore.answers = v.answers.filter(function (id) { return ANSWER_IDS.indexOf(id) !== -1; });
-    }
-    if (!pinStore.answers) {
-      var legacy = null;
-      try { legacy = JSON.parse(window.localStorage.getItem('ccl-saver-pins-v1') || 'null'); } catch (e) { /* none */ }
-      pinStore.answers = Array.isArray(legacy)
-        ? legacy.filter(function (id) { return ANSWER_IDS.indexOf(id) !== -1; })
-        : ['bridge', 'tides', 'weather', 'events'];
-    }
-    if (!pinStore.cards.length) {
-      var fp = null;
-      try { fp = JSON.parse(window.localStorage.getItem('ccl-frontpage-v1') || 'null'); } catch (e) { /* none */ }
-      if (Array.isArray(fp)) pinStore.cards = fp.filter(function (x) { return typeof x === 'string'; });
-    }
-  })();
+     The store itself moved OUT of this module in the v5 pass (it now
+     lives above the pins module, earlier in this file, as
+     window.CCLPins over localStorage 'ccl-pins-v1' — one object,
+     { cards, answers }, shared with the Your-pins zone at the top of
+     Today). This saver owns only the answers half; the shim below
+     keeps the module's original local names wired to the one store. */
+  var pinStore = window.CCLPins._store;
   var pins = pinStore.answers;   // the saver's live view of the answers half
-  function savePins() { pinStore.answers = pins; pinStoreSave(); }
-  window.CCLPins = {
-    key: PINS_KEY,
-    all: function () { return { cards: pinStore.cards.slice(), answers: pinStore.answers.slice() }; },
-    has: function (kind, id) { var l = kind === 'cards' ? pinStore.cards : pinStore.answers; return l.indexOf(id) !== -1; },
-    toggle: function (kind, id) {
-      var l = kind === 'cards' ? pinStore.cards : pinStore.answers;
-      var i = l.indexOf(id);
-      if (i !== -1) l.splice(i, 1); else l.push(id);
-      if (kind === 'answers') { pins = pinStore.answers; paintPins(); if (saverOpen) renderSaverAnswers(); }
-      pinStoreSave();
-      return l.slice();
-    }
-  };
+  function savePins() { pinStore.answers = pins; window.CCLPins._save(); }
   function isPinned(id) { return pins.indexOf(id) !== -1; }
   function togglePin(id) {
     if (isPinned(id)) pins = pins.filter(function (x) { return x !== id; });
@@ -7476,7 +7662,7 @@ const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEH
       var v = a.val();
       return '<div class="saver-answer">'
         + '<div class="saver-answer-label"><img src="' + a.icon + '" alt="" aria-hidden="true"> ' + esc(a.label()) + '</div>'
-        + '<div class="saver-answer-val">' + esc(v || '—') + '</div>'
+        + '<div class="saver-answer-val' + (v && v.length > 24 ? ' long' : '') + '">' + esc(v || '—') + '</div>'
         + (a.sub() ? '<div class="saver-answer-sub">' + esc(a.sub()) + '</div>' : '')
         + '</div>';
     }).join('');
@@ -7576,6 +7762,16 @@ const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEH
     });
     gate();
   }
+
+  /* another writer (the Your-pins zone) can change the shared store —
+     keep this module's view of the answers half in sync, and expose
+     the opener for the drawer's screensaver entry */
+  document.addEventListener('ccl-pins-changed', function () {
+    pins = pinStore.answers;
+    paintPins();
+    if (saverOpen) renderSaverAnswers();
+  });
+  window.CCLOpenSaver = openSaver;
 
   paintPins();
 

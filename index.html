@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
 <title>Columbia County Live — Roads, Rivers, Weather &amp; Ferry for Columbia County, Oregon</title>
 <meta name="description" content="One live map for Columbia County, Oregon: US-30 and Lewis & Clark Bridge status, Columbia & Nehalem river levels, weather alerts, earthquakes, wildfires, aircraft and river traffic overhead and under way, the Oscar B ferry, events, and town forecasts. Free, from official public sources.">
 <meta property="og:type" content="website">
@@ -17,7 +16,12 @@
 <meta name="twitter:title" content="Columbia County Live — Roads, Rivers, Weather & Ferry">
 <meta name="twitter:description" content="Bridge status, river levels, weather alerts, the Oscar B ferry countdown, and local events for Columbia County, Oregon — one live look.">
 <meta name="twitter:image" content="https://travweber67.github.io/columbia-county-live/img/hero-bridge.jpg">
-<meta name="theme-color" content="#1e4228">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f1ecdc">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1e4228">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Columbia County Live">
 <script>
 /* Redesign prototype: set the theme before first paint (no flash).
    Priority: ?theme=dark|light preview override (not stored) > saved
@@ -30,7 +34,8 @@ document.documentElement.setAttribute("data-theme",t);})();
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="img/icons/icon-logo-pine.png">
+<link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <!-- v4 load pass: the two Today backgrounds (one per theme) are the
      only page backgrounds first paint needs — warm them with the hero.
      Every other view's photo is lazy-attached by app.js. -->
@@ -74,10 +79,14 @@ document.documentElement.setAttribute("data-theme",t);})();
   <div class="hero-inner">
     <div class="hero-top">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true"><img src="img/icons/icon-logo-pine.png" alt=""></div>
+        <!-- v5: the logo IS the menu button now — the courthouse mark
+             with a hamburger badge; it opens the slide-out drawer. -->
+        <button class="brand-mark menu-btn" id="menu-btn" type="button" aria-haspopup="dialog" aria-controls="drawer" aria-expanded="false" aria-label="Open the menu — every view and section" title="Menu — every view and section">
+          <img src="img/icons/icon-logo-courthouse.png" alt="" aria-hidden="true">
+          <span class="menu-badge" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
         <div>
           <div class="brand-name">Columbia County <span class="live-word">Live</span></div>
-          <p class="tagline" data-i18n="tagline">Roads · Rivers · Weather · Ferry — Columbia County, Oregon</p>
         </div>
       </div>
       <div class="hero-side">
@@ -91,17 +100,12 @@ document.documentElement.setAttribute("data-theme",t);})();
         <button class="theme-toggle hero-theme-btn" id="theme-btn" type="button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch between light and dark mode"><img class="theme-ico" src="img/icons/icon-theme.png" alt="" aria-hidden="true"><span id="theme-btn-label">Dark</span></button>
       </div>
     </div>
+    <!-- v5 CLEAN HERO (Travis): the hero keeps ONLY the photo, the name
+         up top, and this welcome line. The six quick-nav pill chips, the
+         promise paragraph and the tagline are retired — the drawer menu
+         (logo button, top-left) carries every jump now, and the language
+         toggle lives in the drawer too. -->
     <h1 class="hero-title" data-i18n="herotitle">Everything happening in the county, <em>one live look.</em></h1>
-    <p class="hero-promise" data-i18n="heropromise">US-30 and the Lewis &amp; Clark Bridge, Columbia River levels, weather alerts, the Oscar B ferry, and this week's events — gathered from official public sources and refreshed all day.</p>
-    <nav class="status-strip" aria-label="Jump to a section">
-      <a href="#roads-card" data-i18n="striproads"><span class="pulse-dot" aria-hidden="true"></span>Roads &amp; bridge</a>
-      <a href="#rivers-card" data-i18n="striprivers">🌊 River levels</a>
-      <a href="#alerts-card" data-i18n="stripalerts">⚠️ Weather alerts</a>
-      <a href="#sky-card" data-i18n="stripsky">✈️ Sky &amp; the ISS</a>
-      <a href="#ferry-card" data-i18n="stripferry">⛴️ Oscar B ferry</a>
-      <a href="#events-card" data-i18n="stripevents">📅 Events</a>
-      <button class="lang-pill" id="lang-btn" type="button">🌎 En español</button>
-    </nav>
   </div>
 </header>
 
@@ -115,7 +119,7 @@ document.documentElement.setAttribute("data-theme",t);})();
 <div class="sticky-bar" id="sticky-bar">
   <!-- v4: the green bar no longer repeats the masthead's name — it
        says what this bar is: the live view, condensed. -->
-  <span class="sticky-brand"><img class="sticky-ico" src="img/icons/icon-logo-pine.png" alt="" aria-hidden="true"> Live view</span>
+  <span class="sticky-brand"><img class="sticky-ico" src="img/icons/icon-logo-courthouse.png" alt="" aria-hidden="true"> Live view</span>
   <a class="sticky-pill" id="sticky-weather" href="#alerts-card">⚠️ Weather —</a>
   <a class="sticky-pill" id="sticky-bridge" href="#roads-card">🌉 Bridge —</a>
   <nav class="sticky-links" aria-label="Jump to a section">
@@ -154,6 +158,18 @@ document.documentElement.setAttribute("data-theme",t);})();
     <a class="rail-cta" href="sponsor.html#community">How community notices work &rarr;</a>
   </aside>
 </div>
+
+<!-- v5: YOUR PINS — the top of Today. Pinned cards render here as live
+     copies in pin order; the originals never move (pins are shortcuts,
+     not moves). The zone is hidden while nothing is pinned. -->
+<section class="frontpage" id="frontpage" hidden aria-label="Your pins — live copies of the cards you pinned, at the top of Today">
+  <div class="frontpage-head">
+    <h2 data-i18n="pinsh2">📌 Your pins</h2>
+    <button class="pin-clear" id="frontpage-clear" type="button" data-i18n="pinsclear">Unpin all</button>
+  </div>
+  <p class="card-note frontpage-note" data-i18n="pinsnote">The cards you pinned, living up here in the order you pinned them — live copies that refresh as the readings change, while the originals stay right where they belong. Tap a copy to jump to the real card; tap its <strong>📌 Pinned</strong> button to unpin it.</p>
+  <div class="frontpage-list" id="frontpage-list"></div>
+</section>
 
 <!-- v3: the glance board is one CONTINUOUS full-width strip — all four
      live answers flow right-to-left in a single repeating stream
@@ -223,15 +239,6 @@ document.documentElement.setAttribute("data-theme",t);})();
     </div>
     <p class="founding-foot">Every founding sponsor keeps a permanent &ldquo;Founding Sponsor &middot; 2026&rdquo; badge and a place on the Community Partners wall below — even if they later change tiers.</p>
   </div>
-</section>
-
-<section class="frontpage" id="frontpage" hidden aria-label="Your front page — the cards you pinned to the top of this page">
-  <div class="frontpage-head">
-    <h2>⭐ Your front page</h2>
-    <button class="pin-clear" id="frontpage-clear" type="button">Unpin all</button>
-  </div>
-  <p class="card-note frontpage-note">The cards you check every day, lifted up here in the order you pinned them — still live, still the same readings, just first. Tap a card&rsquo;s <strong>📌 Pinned</strong> button to send it back where it came from.</p>
-  <div class="frontpage-list" id="frontpage-list"></div>
 </section>
 
 <section class="finder" id="finder-card" aria-label="Find anything on this page">
@@ -750,13 +757,28 @@ document.documentElement.setAttribute("data-theme",t);})();
     <button class="share-btn" id="print-btn" type="button">🖨️ Print the county sheet</button>
   </div>
   <p class="print-note">🖨️ The county sheet is one printed page with today&rsquo;s answers — made for the fridge door, the library bulletin board, and the shop counter. Posting it where neighbors pass by is this site&rsquo;s favorite kind of advertising.</p>
-  <p class="lang-note" data-i18n="langnote">🌎 ¿Hablas español? Tap <strong>En español</strong> up top, beside the clock, and this page&rsquo;s headings, buttons and notes switch to Spanish. Live readings, alerts and event listings keep arriving in English from their official sources.</p>
+  <p class="lang-note" data-i18n="langnote">🌎 ¿Hablas español? Tap the courthouse logo up top to open the menu, then tap <strong>En español</strong> — this page&rsquo;s headings, buttons and notes switch to Spanish. Live readings, alerts and event listings keep arriving in English from their official sources.</p>
   <p class="install-help" id="install-help" hidden></p>
 </section>
 
 
 
 
+
+<!-- v5 PWA: the ONE install card. app.js shows it only when the browser
+     has offered an install (beforeinstallprompt), the visitor hasn't
+     dismissed it, and the page isn't already running installed. -->
+<section class="card install-card" id="install-card" hidden aria-label="Install Columbia County Live as an app">
+  <button class="install-dismiss" id="install-card-dismiss" type="button" aria-label="Dismiss the install card">✕</button>
+  <div class="install-card-main">
+    <img class="install-ico" src="img/icons/icon-logo-courthouse.png" alt="" aria-hidden="true">
+    <div>
+      <h2 data-i18n="installh2">Put Columbia County Live on your home screen</h2>
+      <p class="card-note" data-i18n="installp">Installed, it opens full-screen like an app — no address bar, its own icon, the county one tap away. Free, and it still updates itself all day.</p>
+      <button class="share-btn primary" id="install-card-btn" type="button" data-i18n="installcardbtn">📱 Install the app</button>
+    </div>
+  </div>
+</section>
 
 <section class="card saver-card" id="saver-card" aria-label="The community screensaver — county photos and your pinned answers, made for TVs, tablets and waiting rooms">
   <div class="card-head">
@@ -772,11 +794,13 @@ document.documentElement.setAttribute("data-theme",t);})();
   <div class="saver-pins" id="saver-pins" role="group" aria-label="Choose which answers the screensaver shows"></div>
   <h3 class="subhead" data-i18n="savershareh">Share your county photo</h3>
   <p class="card-note" data-i18n="saversharep">The photographs in the screensaver come from the county itself — and yours could be one of them. Send a photo you took anywhere in Columbia County and, once it&rsquo;s approved, it joins the pool every screensaver cycles through, with your name on it. Free, always.</p>
-  <!-- PROTOTYPE PLACEHOLDER: the submit link below points at PHOTO_FORM_URL
-       (constant in app.js). Live step: create the real Google Form — name /
-       where taken / photo upload / rights checkbox, mirroring the sponsor
-       form — and swap the constant. Nothing submitted anywhere is ever
-       published automatically: see the review gate in DESIGN-SPEC.md. -->
+  <!-- The submit link points at PHOTO_FORM_URL (constant in app.js).
+       REMAINING LIVE STEP: create the real Google Form — name / where
+       taken / photo upload / rights checkbox, mirroring the sponsor
+       form — in the signed-in browser and swap the constant (a Forms
+       API create can't carry the file-upload question, so this one is
+       a browser job). Nothing submitted anywhere is ever published
+       automatically: see the review gate in DESIGN-SPEC.md. -->
   <form class="photo-form" id="photo-form">
     <label class="photo-field"><span data-i18n="savername">Your name — shown as the photo credit</span>
       <input id="photo-name" type="text" autocomplete="name" placeholder="e.g. Sam Rivera">
@@ -823,6 +847,77 @@ document.documentElement.setAttribute("data-theme",t);})();
 
 </main>
 
+<!-- v5: THE DRAWER — slide-out menu from the right. The courthouse logo
+     in the masthead opens it. Every view and the sections inside each
+     view are jump links: a tap switches the view, scrolls to the
+     section, and closes the drawer. Frosted glass in both themes. -->
+<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-label="Menu — every view and section on this page">
+  <div class="drawer-head">
+    <span class="drawer-brand"><img src="img/icons/icon-logo-courthouse.png" alt="" aria-hidden="true"><span>Columbia County <span class="live-word">Live</span></span></span>
+    <button class="drawer-close" id="drawer-close" type="button" aria-label="Close the menu">✕</button>
+  </div>
+  <nav class="drawer-nav" aria-label="Views and sections">
+    <div class="drawer-group">
+      <button class="drawer-view" type="button" data-drawer-view="today"><img src="img/icons/icon-today.png" alt="" aria-hidden="true"><span data-i18n="tabtoday">Today</span></button>
+      <a class="drawer-link" href="#commute-card" data-i18n="dwcommute">The commute verdict</a>
+      <a class="drawer-link" href="#go-card" data-i18n="dwgo">Before you go</a>
+      <a class="drawer-link" href="#plan-card" data-i18n="dwplan">Tonight &amp; tomorrow</a>
+      <a class="drawer-link" href="#schools-card" data-i18n="dwschools">Schools — closures &amp; delays</a>
+      <a class="drawer-link" href="#briefing-card" data-i18n="dwbriefing">The County Briefing</a>
+      <a class="drawer-link" href="#home-card" data-i18n="dwhome">Make it yours</a>
+    </div>
+    <div class="drawer-group">
+      <button class="drawer-view" type="button" data-drawer-view="travel"><img src="img/icons/icon-travel.png" alt="" aria-hidden="true"><span data-i18n="tabtravel">Travel</span></button>
+      <a class="drawer-link" href="#map-card" data-i18n="dwmap">The live map</a>
+      <a class="drawer-link" href="#roads-card" data-i18n="dwroads">Roads &amp; the bridge</a>
+      <a class="drawer-link" href="#routeahead-card" data-i18n="dwrouteahead">Route ahead</a>
+      <a class="drawer-link" href="#ferry-card" data-i18n="dwferry">Oscar B ferry</a>
+      <a class="drawer-link" href="#ships-card" data-i18n="dwships">River traffic</a>
+      <a class="drawer-link" href="#aircraft-card" data-i18n="dwaircraft">Aircraft overhead</a>
+      <a class="drawer-link" href="#bend-card" data-i18n="dwbend">The Bend run</a>
+    </div>
+    <div class="drawer-group">
+      <button class="drawer-view" type="button" data-drawer-view="outdoors"><img src="img/icons/icon-outdoors.png" alt="" aria-hidden="true"><span data-i18n="taboutdoors">Outdoors</span></button>
+      <a class="drawer-link" href="#alerts-card" data-i18n="dwalerts">Weather alerts</a>
+      <a class="drawer-link" href="#forecast-card" data-i18n="dwforecast">Forecast</a>
+      <a class="drawer-link" href="#sky-card" data-i18n="dwsky">Sky &amp; the ISS</a>
+      <a class="drawer-link" href="#dark-card" data-i18n="dwdark">After dark</a>
+      <a class="drawer-link" href="#rivers-card" data-i18n="dwrivers">River levels</a>
+      <a class="drawer-link" href="#tides-card" data-i18n="dwtides">River tides</a>
+      <a class="drawer-link" href="#fishpick-card" data-i18n="dwfishpick">Fishing — worth going?</a>
+      <a class="drawer-link" href="#fish-card" data-i18n="dwfish">Fish counts</a>
+      <a class="drawer-link" href="#tracker-card" data-i18n="dwtracker">Salmon tracker</a>
+      <a class="drawer-link" href="#steelhead-card" data-i18n="dwsteelhead">Steelhead</a>
+      <a class="drawer-link" href="#almanac-card" data-i18n="dwalmanac">The Almanac</a>
+      <a class="drawer-link" href="#quakes-card" data-i18n="dwquakes">Earthquakes</a>
+      <a class="drawer-link" href="#fires-card" data-i18n="dwfires">Wildfires</a>
+      <a class="drawer-link" href="#air-card" data-i18n="dwair">Air &amp; smoke</a>
+    </div>
+    <div class="drawer-group">
+      <button class="drawer-view" type="button" data-drawer-view="more"><img src="img/icons/icon-events.png" alt="" aria-hidden="true"><span data-i18n="tabmore">Events &amp; More</span></button>
+      <a class="drawer-link" href="#events-card" data-i18n="dwevents">Events</a>
+      <a class="drawer-link" href="#featured-local" data-i18n="dwfeatured">Featured local</a>
+      <a class="drawer-link" href="#watch-card" data-i18n="dwwatch">The County Watch</a>
+      <a class="drawer-link" href="#saver-card" data-i18n="dwsaver">Community screensaver</a>
+      <a class="drawer-link" href="#freshness-card" data-i18n="dwfresh">How fresh is this page?</a>
+      <a class="drawer-link" href="#about-card" data-i18n="dwabout">About</a>
+    </div>
+  </nav>
+  <div class="drawer-actions">
+    <button class="drawer-action" id="drawer-saver-btn" type="button"><span class="drawer-action-ico" aria-hidden="true">🖥️</span><span data-i18n="saverstart">Start the screensaver</span></button>
+    <a class="drawer-action" href="sponsor.html"><img class="drawer-action-img" src="img/icons/icon-sponsor.png" alt="" aria-hidden="true"><span data-i18n="dwbecome">Become a sponsor</span></a>
+    <a class="drawer-action drawer-photo" href="#photo-form">
+      <span class="drawer-action-ico" aria-hidden="true">📸</span>
+      <span class="drawer-photo-text">
+        <span class="drawer-photo-title" data-i18n="dwphototitle">Share your county photo</span>
+        <span class="drawer-photo-line" data-i18n="dwphotoline">Got a shot of the county you love? Send it in — the good ones join the community screensaver, with your name signed on them like a painting.</span>
+      </span>
+    </a>
+    <button class="drawer-action lang-pill" id="lang-btn" type="button">🌎 En español</button>
+  </div>
+</aside>
+
 <div class="wall-overlay" id="wall-overlay" hidden role="dialog" aria-modal="true" aria-label="County wall display — the county's answers, big and rotating">
   <button class="wall-exit" id="wall-exit" type="button" aria-label="Exit wall display">✕</button>
   <div class="wall-scene" id="wall-scene"></div>
@@ -846,7 +941,7 @@ document.documentElement.setAttribute("data-theme",t);})();
   <div class="saver-photo saver-photo-b" id="saver-photo-b" aria-hidden="true"></div>
   <div class="saver-scrim" aria-hidden="true"></div>
   <div class="saver-top">
-    <span class="saver-brand"><img src="img/icons/icon-logo-pine.png" alt="" aria-hidden="true"> Columbia County <span class="live-word">Live</span></span>
+    <span class="saver-brand"><img src="img/icons/icon-logo-courthouse.png" alt="" aria-hidden="true"> Columbia County <span class="live-word">Live</span></span>
     <span class="saver-live"><span class="pulse-dot" aria-hidden="true"></span> LIVE</span>
   </div>
   <div class="saver-clockbox">

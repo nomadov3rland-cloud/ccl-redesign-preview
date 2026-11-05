@@ -2002,3 +2002,87 @@ html[data-theme="dark"] .saver-chip.on .saver-chip-state{color:#f2c078}
 .saver-pin.on{opacity:1;filter:none;background:rgba(233,164,74,.85);border-color:#f2c078}
 .strip-clone .saver-pin{display:none!important}
 .glance-strip.reduced .saver-pin{opacity:.75}
+
+/* ===== V5 REVISION (Travis's fixes on v4 + screensaver, 2026-11-05) =====
+   Clean hero, the logo becomes the menu button, a slide-out drawer,
+   pin-any-card as live copies at the top of Today, the PWA install
+   card, the courthouse brand mark, and the saver's long-name wrap. */
+
+/* --- the logo is the menu button now --- */
+.brand-mark.menu-btn{cursor:pointer;position:relative;font:inherit;color:inherit;padding:5px}
+.brand-mark.menu-btn img{width:36px;height:36px;border-radius:50%;display:block}
+.menu-badge{position:absolute;right:-7px;bottom:-7px;width:21px;height:21px;border-radius:7px;background:var(--warm-fill);border:1px solid rgba(35,22,10,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.menu-badge span{display:block;width:10px;height:2px;border-radius:1px;background:#23160a}
+.brand-mark.menu-btn:hover{border-color:var(--warm-fill)}
+.brand-mark.menu-btn:active{transform:scale(.96)}
+
+/* --- the drawer: frosted glass sliding in from the right --- */
+.drawer-backdrop{position:fixed;inset:0;z-index:1200;background:rgba(10,18,12,.45);opacity:0;transition:opacity .25s ease}
+.drawer-backdrop.open{opacity:1}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:1201;width:min(86vw,344px);display:flex;flex-direction:column;transform:translateX(106%);transition:transform .3s ease;background:rgba(251,248,238,.92);-webkit-backdrop-filter:blur(18px) saturate(1.15);backdrop-filter:blur(18px) saturate(1.15);border-left:1px solid var(--border);box-shadow:-18px 0 44px rgba(20,30,16,.28);color:var(--text)}
+.drawer.open{transform:none}
+.drawer[hidden]{display:none}
+html[data-theme="dark"] .drawer{background:rgba(20,32,24,.94);color:#eef0e2;border-left-color:rgba(244,241,228,.18)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .drawer{background:#fbf8ee}
+  html[data-theme="dark"] .drawer{background:#16211a}
+}
+@media (prefers-reduced-transparency:reduce){
+  .drawer{-webkit-backdrop-filter:none;backdrop-filter:none;background:#fbf8ee}
+  html[data-theme="dark"] .drawer{background:#16211a}
+}
+@media (prefers-reduced-motion:reduce){
+  .drawer,.drawer-backdrop{transition:none}
+}
+body.drawer-on{overflow:hidden}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+html[data-theme="dark"] .drawer-head{border-bottom-color:rgba(244,241,228,.16)}
+.drawer-brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:1.02rem}
+.drawer-brand img{width:32px;height:32px;border-radius:50%}
+.drawer-brand .live-word{color:var(--warm)}
+html[data-theme="dark"] .drawer-brand .live-word{color:var(--warm-fill)}
+.drawer-close{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:transparent;color:inherit;font-size:1rem;cursor:pointer}
+.drawer-close:hover{border-color:var(--warm)}
+.drawer-nav{flex:1;overflow-y:auto;padding:6px 10px 12px;-webkit-overflow-scrolling:touch}
+.drawer-group{padding:8px 0 4px}
+.drawer-group + .drawer-group{border-top:1px solid var(--border)}
+html[data-theme="dark"] .drawer-group + .drawer-group{border-top-color:rgba(244,241,228,.14)}
+.drawer-view{display:flex;align-items:center;gap:9px;width:100%;padding:8px 8px 6px;background:none;border:0;font:inherit;font-weight:800;font-size:.98rem;color:var(--accent-dark);cursor:pointer;text-align:left}
+html[data-theme="dark"] .drawer-view{color:#bfe3c8}
+.drawer-view img{width:24px;height:24px;border-radius:50%}
+.drawer-view:hover{text-decoration:underline}
+.drawer-link{display:block;padding:7px 10px 7px 41px;border-radius:9px;color:var(--muted);text-decoration:none;font-size:.94rem}
+.drawer-link:hover{background:rgba(46,93,58,.1);color:var(--text)}
+html[data-theme="dark"] .drawer-link{color:#c9d2bd}
+html[data-theme="dark"] .drawer-link:hover{background:rgba(244,241,228,.08);color:#fff}
+.drawer-actions{border-top:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px}
+html[data-theme="dark"] .drawer-actions{border-top-color:rgba(244,241,228,.16)}
+.drawer-action{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.35);color:var(--text);font:inherit;font-size:.95rem;font-weight:600;text-decoration:none;cursor:pointer;text-align:left}
+html[data-theme="dark"] .drawer-action{background:rgba(244,241,228,.06);color:#eef0e2;border-color:rgba(244,241,228,.18)}
+.drawer-action:hover{border-color:var(--warm)}
+.drawer-action-ico{font-size:1.1rem;line-height:1;flex:none}
+.drawer-action-img{width:24px;height:24px;border-radius:50%;flex:none}
+.drawer-photo{background:rgba(233,164,74,.22);border-color:rgba(176,81,28,.45)}
+html[data-theme="dark"] .drawer-photo{background:rgba(233,164,74,.16)}
+.drawer-photo-text{display:flex;flex-direction:column;gap:2px}
+.drawer-photo-title{font-weight:800}
+.drawer-photo-line{font-size:.82rem;font-weight:500;line-height:1.35;color:var(--muted)}
+html[data-theme="dark"] .drawer-photo-line{color:#d8dfc8}
+
+/* --- your pins: live copies at the top of Today --- */
+.pin-copy{cursor:pointer}
+.pin-copy-tag{display:flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--warm);margin:0 0 8px}
+.pin-copy .card-head.has-pin{padding-right:96px}
+
+/* --- the ONE install card (Events & More) --- */
+.install-card{position:relative}
+.install-dismiss{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.95rem;cursor:pointer;z-index:2}
+.install-dismiss:hover{color:var(--text);border-color:var(--warm)}
+.install-card-main{display:flex;gap:14px;align-items:flex-start;padding-right:30px}
+.install-ico{width:58px;height:58px;border-radius:15px;flex:none;box-shadow:0 4px 14px rgba(30,40,20,.25)}
+.install-card-main h2{font-size:1.12rem;margin-bottom:4px}
+.install-card-main .share-btn{margin-top:8px}
+
+/* --- saver: long event names wrap instead of ellipsizing (fix 7) --- */
+.saver-answer-val{-webkit-line-clamp:3}
+.saver-answer-val.long{font-size:clamp(1.02rem,2.3vw,1.55rem);line-height:1.16}

@@ -6907,50 +6907,65 @@ langSet = function (lang) {
   paint();
 })();
 
-/* ---------- Redesign prototype 2026-11-05: the glance ticker ----------
-   The four glance tiles become one slow right-to-left scrolling display:
-   each answer takes its turn (6.5s), entering from the right, in the
-   panel's fixed order. Labelled pills under the stage jump straight to an
-   answer. Rotation pauses on hover / focus / touch and whenever the
-   Today view or the tab is hidden; prefers-reduced-motion leaves a
-   static 2x2 board instead. Data wiring is untouched: the glance module
-   still writes into the same .glance-val IDs on these same tiles. */
-(function initTicker() {
+/* ---------- v3 (2026-11-05): the glance strip ----------
+   The four glance answers flow in ONE continuous full-width stream,
+   right-to-left, seamlessly looped — the marquee technique from
+   Travis's own portfolio sites (a flex track at width:max-content,
+   content duplicated, animated to translateX(-50%)). The four items
+   in the markup are canonical: the glance module still writes into
+   the same .glance-val IDs on those same items (data wiring
+   untouched). This script clones the set until the track holds two
+   identical halves wide enough for any viewport, strips the clones'
+   IDs, marks them aria-hidden + untabbable, routes their clicks
+   through the same view router, and keeps every clone in sync with
+   its canonical item via MutationObserver (values, subs and the
+   ok/warn/bad status classes all copy over). Motion is pure CSS;
+   hover / focus pauses it. prefers-reduced-motion: no clones, no
+   animation — a static full-width strip, horizontally scrollable. */
+(function initStrip() {
   var section = document.getElementById('glance-card'); if (!section) return;
-  var stage = document.getElementById('ticker-stage');
-  var nav = document.getElementById('ticker-nav');
-  var slides = Array.prototype.slice.call(stage.querySelectorAll('.ticker-slide'));
-  if (!slides.length) return;
-  section.classList.add('js');
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (reduce.matches) { section.classList.add('reduced'); slides.forEach(function (s) { s.classList.add('active'); }); return; }
-
-  slides.forEach(function (s) {
-    var b = document.createElement('button');
-    b.type = 'button'; b.className = 'ticker-dot';
-    b.textContent = s.getAttribute('data-label') || 'Answer';
-    b.setAttribute('aria-label', 'Show: ' + b.textContent);
-    b.addEventListener('click', function () { show(slides.indexOf(s)); restart(); });
-    s._dot = b; nav.appendChild(b);
-  });
-
-  var idx = 0, timer = null, paused = false;
-  function show(i) {
-    slides.forEach(function (s, j) {
-      var was = s.classList.contains('active');
-      s.classList.toggle('active', j === i);
-      s.classList.toggle('leaving', was && j !== i);
-      if (s._dot) s._dot.classList.toggle('active', j === i);
-    });
-    idx = i;
+  var track = document.getElementById('strip-track'); if (!track) return;
+  var items = Array.prototype.slice.call(track.querySelectorAll('.strip-item'));
+  if (!items.length) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    section.classList.add('reduced');
+    return;
   }
-  function tick() { if (!paused && !document.hidden && !section.closest('.view').hidden) show((idx + 1) % slides.length); }
-  function restart() { if (timer) clearInterval(timer); timer = setInterval(tick, 6500); }
-  ['mouseenter', 'focusin', 'pointerdown'].forEach(function (ev) { section.addEventListener(ev, function () { paused = true; }); });
-  ['mouseleave', 'focusout'].forEach(function (ev) { section.addEventListener(ev, function () { paused = false; }); });
 
-  show(0);
-  restart();
+  var SETS_PER_HALF = 3;
+  var clones = items.map(function () { return []; });
+  function makeClone(src, j) {
+    var c = src.cloneNode(true);
+    c.removeAttribute('id');
+    c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+    c.setAttribute('aria-hidden', 'true');
+    c.setAttribute('tabindex', '-1');
+    c.classList.add('strip-clone');
+    c.addEventListener('click', function (ev) {
+      if (typeof cclRouteAnchor === 'function') { ev.preventDefault(); cclRouteAnchor(c); }
+    });
+    clones[j].push(c);
+    return c;
+  }
+  for (var half = 0; half < 2; half++) {
+    for (var s = 0; s < SETS_PER_HALF; s++) {
+      if (half === 0 && s === 0) continue; /* the canonical set is already in the track */
+      items.forEach(function (src, j) { track.appendChild(makeClone(src, j)); });
+    }
+  }
+  items.forEach(function (src, j) {
+    if (!window.MutationObserver || !clones[j].length) return;
+    var sync = function () {
+      clones[j].forEach(function (c) {
+        c.innerHTML = src.innerHTML;
+        c.className = src.className + ' strip-clone';
+      });
+    };
+    new MutationObserver(sync).observe(src, {
+      subtree: true, childList: true, characterData: true,
+      attributes: true, attributeFilter: ['class']
+    });
+  });
 })();
 
 /* ---------- Redesign prototype 2026-11-05: Featured Event slot ----------
@@ -6997,25 +7012,33 @@ langSet = function (lang) {
   });
 })();
 
-/* ---------- v2 (2026-11-05): full-page photo background cycler ----------
-   The .page-bg layer stacks (day / dusk) are shown/hidden by the theme in
-   CSS; this only advances which photo is "on" inside each stack, in sync,
-   every 9s. A gentle crossfade (CSS, 2.6s) does the rest. Under
-   prefers-reduced-motion the first photo stays put — no cycling at all. */
+/* ---------- v3 (2026-11-05): calm per-view photo background ----------
+   No timers, no cycling (Travis: the constantly changing background
+   was "too much"). Each view owns ONE strong photo per theme — the
+   layer whose data-bg-view matches the visible view is "on"; the day
+   and dusk stacks are still shown/hidden by the theme in CSS. The
+   photo changes only when the visitor changes view or theme, with a
+   single short crossfade (the portfolio pattern: imagery swaps on
+   user action, e.g. the detailing demo's service figure). View
+   switching toggles the sections' hidden attribute (cclShowView), so
+   a MutationObserver on that attribute is the whole mechanism. */
 (function () {
-  var stacks = document.querySelectorAll('.page-bg .bg-stack');
-  if (!stacks.length) return;
-  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var max = 0;
-  stacks.forEach(function (s) { max = Math.max(max, s.children.length); });
-  if (max < 2) return;
-  var idx = 0;
-  setInterval(function () {
-    if (document.hidden) return;
-    idx = (idx + 1) % max;
-    stacks.forEach(function (s) {
-      var layers = s.children, on = idx % layers.length;
-      for (var i = 0; i < layers.length; i++) layers[i].classList.toggle('on', i === on);
-    });
-  }, 9000);
+  var layers = Array.prototype.slice.call(document.querySelectorAll('.page-bg .bg-layer[data-bg-view]'));
+  if (!layers.length) return;
+  var views = Array.prototype.slice.call(document.querySelectorAll('.view[data-view]'));
+  function current() {
+    for (var i = 0; i < views.length; i++) {
+      if (!views[i].hidden) return views[i].getAttribute('data-view');
+    }
+    return 'today';
+  }
+  function apply() {
+    var name = current();
+    layers.forEach(function (l) { l.classList.toggle('on', l.getAttribute('data-bg-view') === name); });
+  }
+  apply();
+  if (window.MutationObserver) {
+    var mo = new MutationObserver(apply);
+    views.forEach(function (v) { mo.observe(v, { attributes: true, attributeFilter: ['hidden', 'class'] }); });
+  }
 })();

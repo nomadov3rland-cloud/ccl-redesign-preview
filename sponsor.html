@@ -17,22 +17,14 @@ document.documentElement.setAttribute("data-theme",t);})();
 </head>
 <body class="sponsor-page">
 
-<!-- v2: full-page county photo background (same system as index.html;
-     cycled by the inline script at the end of this page) -->
+<!-- v3: full-page county photo background — one calm static photo per
+     theme (the bridge, same as the homepage's Today view). No cycling. -->
 <div class="page-bg" aria-hidden="true">
   <div class="bg-stack bg-day">
     <div class="bg-layer on" style="background-image:url('img/bg/bg-day-1.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-2.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-3.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-4.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-5.jpg')"></div>
   </div>
   <div class="bg-stack bg-dusk">
     <div class="bg-layer on" style="background-image:url('img/bg/bg-dusk-1.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-2.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-3.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-4.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-5.jpg')"></div>
   </div>
 </div>
 
@@ -53,18 +45,20 @@ document.documentElement.setAttribute("data-theme",t);})();
   <section id="founding" aria-label="Founding sponsor">
     <div class="sp-grid">
       <div class="sp-phone" aria-hidden="true">
-        <section class="glance ticker js">
-          <div class="ticker-stage">
-            <div class="glance-tile ticker-slide active">
-              <img class="gl-ico" src="img/icons/icon-bridge.png" alt="">
-              <span class="ticker-main">
-                <span class="glance-label">Bridge</span>
-                <span class="glance-val ok">Clear</span>
-                <span class="glance-sub">Lewis &amp; Clark Bridge</span>
-              </span>
-            </div>
-          </div>
-        </section>
+        <div class="mock-strip">
+          <span class="ms-item">
+            <img class="gl-ico" src="img/icons/icon-bridge.png" alt="">
+            <span class="ms-main"><span class="ms-top">Bridge · Lewis &amp; Clark Bridge</span><span class="ms-val ok">Clear</span></span>
+          </span>
+          <span class="ms-item">
+            <img class="gl-ico" src="img/icons/icon-alert.png" alt="">
+            <span class="ms-main"><span class="ms-top">Weather alerts · NWS</span><span class="ms-val">None</span></span>
+          </span>
+          <span class="ms-item">
+            <img class="gl-ico" src="img/icons/icon-river.png" alt="">
+            <span class="ms-main"><span class="ms-top">Columbia River</span><span class="ms-val">At the gauge</span></span>
+          </span>
+        </div>
         <section class="founding-panel">
           <div class="founding-inner">
             <p class="founding-eyebrow">Presented by our Founding Sponsors</p>
@@ -153,15 +147,6 @@ document.documentElement.setAttribute("data-theme",t);})();
   <p style="margin-top:34px"><a class="sp-back" href="index.html">&larr; Back to Columbia County Live</a></p>
 
 </main>
-<script>
-/* v2: full-page photo background cycler (twin of the app.js block —
-   sponsor.html does not load app.js). Static under reduced motion. */
-(function(){var stacks=document.querySelectorAll('.page-bg .bg-stack');if(!stacks.length)return;
-if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-var max=0;stacks.forEach(function(s){max=Math.max(max,s.children.length);});if(max<2)return;
-var idx=0;setInterval(function(){if(document.hidden)return;idx=(idx+1)%max;
-stacks.forEach(function(s){var layers=s.children,on=idx%layers.length;
-for(var i=0;i<layers.length;i++)layers[i].classList.toggle('on',i===on);});},9000);})();
-</script>
+<!-- v3: no background script on this page — the photo is static per theme. -->
 </body>
 </html>

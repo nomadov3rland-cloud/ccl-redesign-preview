@@ -34,23 +34,23 @@ document.documentElement.setAttribute("data-theme",t);})();
 </head>
 <body>
 
-<!-- v2: full-page county photo background (fixed layer; day set in light
-     mode, verified dusk pool in dark mode; cycled by app.js, static under
-     prefers-reduced-motion) -->
+<!-- v3: full-page county photo background — CALM. One strong static
+     photo per view (portfolio pattern: imagery changes only when the
+     view or the theme changes, never on a timer). Day set in light
+     mode, verified dusk pool in dark mode; app.js lights the layer
+     whose data-bg-view matches the visible view. -->
 <div class="page-bg" aria-hidden="true">
   <div class="bg-stack bg-day">
-    <div class="bg-layer on" style="background-image:url('img/bg/bg-day-1.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-2.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-3.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-4.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-day-5.jpg')"></div>
+    <div class="bg-layer on" data-bg-view="today" style="background-image:url('img/bg/bg-day-1.jpg')"></div>
+    <div class="bg-layer" data-bg-view="travel" style="background-image:url('img/bg/bg-day-4.jpg')"></div>
+    <div class="bg-layer" data-bg-view="outdoors" style="background-image:url('img/bg/bg-day-3.jpg')"></div>
+    <div class="bg-layer" data-bg-view="more" style="background-image:url('img/bg/bg-day-5.jpg')"></div>
   </div>
   <div class="bg-stack bg-dusk">
-    <div class="bg-layer on" style="background-image:url('img/bg/bg-dusk-1.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-2.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-3.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-4.jpg')"></div>
-    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-5.jpg')"></div>
+    <div class="bg-layer on" data-bg-view="today" style="background-image:url('img/bg/bg-dusk-1.jpg')"></div>
+    <div class="bg-layer" data-bg-view="travel" style="background-image:url('img/bg/bg-dusk-5.jpg')"></div>
+    <div class="bg-layer" data-bg-view="outdoors" style="background-image:url('img/bg/bg-dusk-3.jpg')"></div>
+    <div class="bg-layer" data-bg-view="more" style="background-image:url('img/bg/bg-dusk-4.jpg')"></div>
   </div>
 </div>
 
@@ -113,42 +113,46 @@ document.documentElement.setAttribute("data-theme",t);})();
 
 <section class="view" id="view-today" data-view="today" aria-label="Today — the county at a glance">
 
-<section class="glance ticker" id="glance-card" aria-label="Columbia County at a glance — the live answers, rotating">
-  <div class="ticker-stage" id="ticker-stage">
-    <a class="glance-tile ticker-slide" href="#roads-card" data-label="Bridge">
-      <img class="gl-ico" src="img/icons/icon-bridge.png" alt="" aria-hidden="true">
-      <span class="ticker-main">
-        <span class="glance-label"><span data-i18n="glbridge">Bridge</span></span>
-        <span class="glance-val" id="glance-bridge-val">Checking…</span>
-        <span class="glance-sub" data-i18n="glbridgesub">Lewis &amp; Clark Bridge</span>
-      </span>
-    </a>
-    <a class="glance-tile ticker-slide" href="#alerts-card" data-label="Weather">
-      <img class="gl-ico" src="img/icons/icon-alert.png" alt="" aria-hidden="true">
-      <span class="ticker-main">
-        <span class="glance-label"><span data-i18n="glalerts">Weather alerts</span></span>
-        <span class="glance-val" id="glance-alerts-val">Checking…</span>
-        <span class="glance-sub" data-i18n="glalertssub">National Weather Service</span>
-      </span>
-    </a>
-    <a class="glance-tile ticker-slide" href="#rivers-card" data-label="River">
-      <img class="gl-ico" src="img/icons/icon-river.png" alt="" aria-hidden="true">
-      <span class="ticker-main">
-        <span class="glance-label"><span data-i18n="glriver">Columbia River</span></span>
-        <span class="glance-val" id="glance-river-val">Checking…</span>
-        <span class="glance-sub" data-i18n="glriversub">Port Westward gauge · USGS</span>
-      </span>
-    </a>
-    <a class="glance-tile ticker-slide" href="#events-card" data-label="Next event">
-      <img class="gl-ico" src="img/icons/icon-event-pin.png" alt="" aria-hidden="true">
-      <span class="ticker-main">
-        <span class="glance-label"><span data-i18n="glevents">Next event</span></span>
-        <span class="glance-val" id="glance-events-val">Checking…</span>
-        <span class="glance-sub">From the local calendars</span>
-      </span>
-    </a>
+<!-- v3: the glance board is one CONTINUOUS full-width strip — all four
+     live answers flow right-to-left in a single repeating stream
+     (the marquee pattern from Travis's own portfolio sites). It breaks
+     out of the content column edge-to-edge. The four items below are
+     the canonical ones: they carry the live-data IDs (data wiring
+     unchanged) and app.js clones them into the seamless loop, keeping
+     the clones in sync. No pill row. -->
+<section class="glance-strip" id="glance-card" aria-label="Columbia County at a glance — the live answers, scrolling">
+  <div class="strip-viewport">
+    <div class="strip-track" id="strip-track">
+      <a class="strip-item glance-tile" href="#roads-card">
+        <img class="gl-ico" src="img/icons/icon-bridge.png" alt="" aria-hidden="true">
+        <span class="strip-main">
+          <span class="strip-top"><span class="glance-label"><span data-i18n="glbridge">Bridge</span></span><span class="strip-sep" aria-hidden="true">·</span><span class="glance-sub" data-i18n="glbridgesub">Lewis &amp; Clark Bridge</span></span>
+          <span class="glance-val" id="glance-bridge-val">Checking…</span>
+        </span>
+      </a>
+      <a class="strip-item glance-tile" href="#alerts-card">
+        <img class="gl-ico" src="img/icons/icon-alert.png" alt="" aria-hidden="true">
+        <span class="strip-main">
+          <span class="strip-top"><span class="glance-label"><span data-i18n="glalerts">Weather alerts</span></span><span class="strip-sep" aria-hidden="true">·</span><span class="glance-sub" data-i18n="glalertssub">National Weather Service</span></span>
+          <span class="glance-val" id="glance-alerts-val">Checking…</span>
+        </span>
+      </a>
+      <a class="strip-item glance-tile" href="#rivers-card">
+        <img class="gl-ico" src="img/icons/icon-river.png" alt="" aria-hidden="true">
+        <span class="strip-main">
+          <span class="strip-top"><span class="glance-label"><span data-i18n="glriver">Columbia River</span></span><span class="strip-sep" aria-hidden="true">·</span><span class="glance-sub" data-i18n="glriversub">Port Westward gauge · USGS</span></span>
+          <span class="glance-val" id="glance-river-val">Checking…</span>
+        </span>
+      </a>
+      <a class="strip-item glance-tile" href="#events-card">
+        <img class="gl-ico" src="img/icons/icon-event-pin.png" alt="" aria-hidden="true">
+        <span class="strip-main">
+          <span class="strip-top"><span class="glance-label"><span data-i18n="glevents">Next event</span></span><span class="strip-sep" aria-hidden="true">·</span><span class="glance-sub">From the local calendars</span></span>
+          <span class="glance-val" id="glance-events-val">Checking…</span>
+        </span>
+      </a>
+    </div>
   </div>
-  <div class="ticker-nav" id="ticker-nav" aria-label="Choose a headline answer"></div>
 </section>
 
 <section class="founding-panel" id="founding-panel" aria-label="Founding sponsors of Columbia County Live">

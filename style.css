@@ -1649,3 +1649,138 @@ html[data-theme="dark"] .sp-note,html[data-theme="dark"] .sp-back{
 html[data-theme="dark"] .finder-hint{
   background:rgba(16,28,19,.68);border-color:rgba(196,226,196,.14);text-shadow:none;
 }
+
+/* =====================================================================
+   V3 REVISION (Travis's corrections on v2, 2026-11-05) — supersedes the
+   v2 glance board and the cycling background:
+   1. THE GLANCE STRIP — one continuous full-width stream (below).
+   2. CALM BACKGROUND — one static photo per view; the timed crossfade
+      cycle and the settle-zoom are gone; the uniform veil becomes the
+      portfolio's directional scrim (dark where type sits, clear where
+      the photo should pop).
+   3. Cards stay exactly as v2 — etched glass over the imagery.
+   The v1/v2 .ticker rules above are now unused by the markup (the
+   sponsor phone mock has its own .mock-strip styles at the bottom).
+   ===================================================================== */
+
+/* the strip breaks out of the content column — keep the page itself
+   from growing a horizontal scrollbar over the 100vw math */
+html,body{overflow-x:clip}
+
+/* ---------- 2 · calm background ---------- */
+.bg-layer{transition:opacity .6s ease;transform:none}
+@media (prefers-reduced-motion:no-preference){
+  .bg-layer.on{animation:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .bg-layer{transition:none}
+}
+/* directional scrim — portfolio pattern (lawn hero: gradient dark at
+   the ends where the type sits, clear through the middle). The glass
+   cards carry their own legibility; this only grounds the masthead
+   zone at the top and the tab-bar / footer zone at the bottom. */
+.page-bg::after{
+  background:linear-gradient(180deg,
+    rgba(17,32,19,.40) 0, rgba(17,32,19,.14) 15%,
+    rgba(17,32,19,0) 32%, rgba(17,32,19,0) 76%,
+    rgba(17,32,19,.28) 100%);
+}
+html[data-theme="dark"] .page-bg::after{
+  background:linear-gradient(180deg,
+    rgba(3,8,4,.60) 0, rgba(3,8,4,.32) 15%,
+    rgba(3,8,4,.08) 34%, rgba(3,8,4,.12) 76%,
+    rgba(3,8,4,.48) 100%);
+}
+
+/* ---------- 1 · the glance strip ---------- */
+.glance-strip{
+  flex:none;width:100vw;margin-left:calc(50% - 50vw);
+  background:linear-gradient(180deg,rgba(21,40,25,.88),rgba(13,26,16,.92));
+  -webkit-backdrop-filter:blur(14px) saturate(1.25);
+  backdrop-filter:blur(14px) saturate(1.25);
+  border-top:1px solid rgba(233,244,220,.18);
+  border-bottom:1px solid rgba(233,244,220,.18);
+  box-shadow:0 16px 34px rgba(10,18,8,.30);
+}
+.strip-viewport{overflow:hidden}
+/* the portfolio marquee: track at max-content, two identical halves,
+   slide to -50% and loop; 80s = a slow, calm drift */
+.strip-track{
+  display:flex;width:max-content;
+  animation:stripScroll 80s linear infinite;
+  will-change:transform;
+}
+@keyframes stripScroll{to{transform:translateX(-50%)}}
+.glance-strip:hover .strip-track,
+.glance-strip:focus-within .strip-track{animation-play-state:paused}
+.strip-item.glance-tile{
+  flex:none;flex-direction:row;align-items:center;gap:13px;
+  background:transparent;border:0;border-right:1px solid rgba(233,244,220,.14);
+  border-radius:0;box-shadow:none;color:#eef4e2;
+  padding:11px 26px 11px 22px;transform:none;
+}
+.strip-item.glance-tile:hover{border-color:rgba(233,244,220,.14);transform:none}
+.glance-strip .gl-ico{width:36px;height:36px;flex:none}
+.strip-main{display:flex;flex-direction:column;gap:1px;min-width:0}
+.strip-top{display:flex;align-items:baseline;gap:7px;white-space:nowrap}
+.glance-strip .glance-label{color:#cfe0b8;font-size:.68rem}
+.glance-strip .strip-sep{color:#8aa583;font-size:.68rem}
+.glance-strip .glance-sub{color:#a9bfa0;font-size:.72rem;white-space:nowrap}
+.glance-strip .glance-val{
+  font-family:var(--display);font-weight:700;color:#fff;
+  font-size:1.18rem;line-height:1.18;letter-spacing:0;
+  display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:36ch;-webkit-line-clamp:unset;-webkit-box-orient:unset;
+}
+.glance-strip .glance-val.ok{color:#a5ecb6}
+.glance-strip .glance-val.warn{color:#ffc98a}
+.glance-strip .glance-val.bad{color:#ffab9e}
+@media (max-width:560px){
+  .strip-item.glance-tile{gap:10px;padding:9px 20px 9px 16px}
+  .glance-strip .gl-ico{width:30px;height:30px}
+  .glance-strip .glance-val{font-size:1.03rem;max-width:27ch}
+  .glance-strip .glance-sub{font-size:.68rem}
+}
+/* reduced motion: no stream — a static, swipeable full-width strip */
+.glance-strip.reduced .strip-viewport{overflow-x:auto}
+.glance-strip.reduced .strip-track{animation:none}
+@media (prefers-reduced-motion:reduce){
+  .strip-track{animation:none}
+  .strip-viewport{overflow-x:auto}
+}
+/* strip fallbacks, same discipline as the cards */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glance-strip{background:#16281a}
+}
+@media (prefers-reduced-transparency:reduce){
+  .glance-strip{background:#16281a;backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+@media (prefers-contrast:more){
+  .glance-strip{background:#101f13}
+}
+@media print{
+  .glance-strip{display:none}
+}
+
+/* sponsor page phone mock: the strip, miniaturised and static */
+.sp-phone .mock-strip{
+  display:flex;overflow:hidden;
+  background:linear-gradient(180deg,rgba(21,40,25,.94),rgba(13,26,16,.97));
+  border-top:1px solid rgba(233,244,220,.18);
+  border-bottom:1px solid rgba(233,244,220,.18);
+}
+.sp-phone .ms-item{
+  display:flex;align-items:center;gap:8px;flex:none;
+  padding:8px 14px;border-right:1px solid rgba(233,244,220,.14);
+}
+.sp-phone .ms-item .gl-ico{width:26px;height:26px;flex:none}
+.sp-phone .ms-main{display:flex;flex-direction:column}
+.sp-phone .ms-top{
+  font-size:.52rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:#a9bfa0;white-space:nowrap;
+}
+.sp-phone .ms-val{
+  font-family:var(--display);font-size:.88rem;font-weight:700;
+  color:#fff;white-space:nowrap;line-height:1.2;
+}
+.sp-phone .ms-val.ok{color:#a5ecb6}

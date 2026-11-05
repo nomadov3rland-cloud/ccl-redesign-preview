@@ -2242,3 +2242,55 @@ html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:r
 @media print{
   .card-bgphoto{display:none}
 }
+
+/* =====================================================================
+   ===== V7 REVISION (Travis, 2026-11-05) =====
+   A real Mt. Hood over the Bend run, saver tiles at parade scale,
+   a compact phone masthead, and river evenings for dark mode.
+   ===================================================================== */
+
+/* --- 1 · the Bend band is Mt. Hood now -------------------------------
+   The band file is pre-cropped to the summit (Trillium Lake original,
+   U.S. Forest Service, public domain — photos/PHOTOS.md); this just
+   frames the peak a touch higher in the strip. */
+.photo-summit img{object-position:center 30%}
+
+/* --- 2 · saver stream tiles at parade scale ---------------------------
+   Travis: the tiles should NOT all fit across the screen — the slow
+   scroll exists because they parade by. Tiles go to ~41vw (capped
+   820px): at 1920px a tile is ~790px, so two fill the frame and the
+   third is always arriving. Type scales ~1.45x with them; the loop
+   On a TV one set takes ~130s to pass; on a phone ~55s. The 1-pin and
+   reduced-motion static states keep the v6 sizing — they are a reading
+   row, not a parade. (The duration itself is computed in app.js from
+   the track width — the track's inline style owns it.) */
+.saver-scroll-set{gap:20px;padding-right:20px}
+.saver-scroll-set .saver-answer{width:min(820px,41vw);max-width:none;padding:24px 30px 22px;border-radius:22px}
+.saver-scroll-set .saver-answer-label{font-size:clamp(1.02rem,2vw,1.4rem);gap:10px}
+.saver-scroll-set .saver-answer-label img{width:32px;height:32px}
+.saver-scroll-set .saver-answer-val{font-size:clamp(2.1rem,5vw,3.6rem);margin-top:8px}
+.saver-scroll-set .saver-answer-val.long{font-size:clamp(1.45rem,3.2vw,2.2rem)}
+.saver-scroll-set .saver-answer-val.xlong{font-size:clamp(1.3rem,2.7vw,1.85rem)}
+.saver-scroll-set .saver-answer-sub{font-size:clamp(1.15rem,2.4vw,1.5rem);margin-top:6px}
+@media (max-width:640px){
+  .saver-scroll-set .saver-answer{width:82vw;padding:20px 22px 18px}
+}
+
+/* --- 3 · compact phone masthead ---------------------------------------
+   Travis: the Display and Dark pills eat the phone masthead. At phone
+   widths (the same ≤560px line where the clock already hides) both
+   become 44px circular icon buttons — matched pair, amber rings,
+   labels off. The words remain on wider screens; the buttons keep
+   their aria-labels and titles at every width, and the theme label
+   span stays in the DOM (the toggle's JS writes it) — it is only
+   visually hidden here. The freed width goes back to the site name. */
+@media (max-width:560px){
+  .hero-side{gap:8px;align-items:center}
+  .hero-side .hero-theme-btn{
+    width:44px;height:44px;min-height:44px;padding:0;gap:0;flex:none;
+    border-radius:50%;justify-content:center;
+  }
+  .hero-side .hero-theme-btn span{display:none}
+  .hero-side .hero-theme-btn .theme-ico{width:22px;height:22px}
+}
+

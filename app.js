@@ -7792,8 +7792,14 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
     wrap.classList.remove('is-static');
     wrap.classList.add('scrolling');
     var set = shown.map(saverTile).join('');
-    /* one full set passes in ~13s per answer — a calm, readable drift */
-    var dur = Math.max(26, shown.length * 13);
+    /* v7: the tiles are parade-scale now (~41vw wide, 82vw on phones),
+       so the loop is timed by TRACK WIDTH, not answer count — a constant
+       ~25px/s drift, the same stately pace v6 had, at any screen size.
+       (v6's flat 13s-per-answer would drag the wide tiles past at
+       ~60px/s on a TV.) One set passing = setW / 25 seconds. */
+    var vwSaver = window.innerWidth || 1200;
+    var tileWSaver = vwSaver <= 640 ? vwSaver * 0.82 : Math.min(820, vwSaver * 0.41);
+    var dur = Math.max(30, Math.round(shown.length * (tileWSaver + 20) / 25));
     wrap.innerHTML = '<div class="saver-scroll-viewport"><div class="saver-scroll-track" style="animation-duration:' + dur + 's">'
       + '<div class="saver-scroll-set">' + set + '</div>'
       + '<div class="saver-scroll-set" aria-hidden="true">' + set + '</div>'

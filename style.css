@@ -1570,34 +1570,15 @@ html[data-theme="dark"] .sp-avail,html[data-theme="dark"] .sp-terms,html[data-th
 .card-band{display:none}
 .band-card{padding-top:20px}
 
-/* ---------- 3) staggered side-by-side pairs ---------- */
-/* homepage founding panel: the three cells step down across the panel */
-@media (min-width:761px){
-  #founding-panel .founding-cell:nth-child(2){margin-top:18px}
-  #founding-panel .founding-cell:nth-child(3){margin-top:36px}
-}
-@media (max-width:760px){
-  #founding-panel .founding-cell:nth-child(2){margin-inline-start:14px}
-  #founding-panel .founding-cell:nth-child(3){margin-inline-start:28px}
-}
-/* homepage featured local: the house card sits lower than the invite */
-@media (min-width:641px){
-  .featured-row .featured-card:nth-child(2){margin-top:26px}
-}
-@media (max-width:640px){
-  .featured-row .featured-card:nth-child(2){margin-inline-start:18px}
-}
-/* sponsor page: slot card + terms block, offset, sides alternating
-   (founding = card left / text right; featured = text left / card right,
-   already the DOM order — the stagger is what v2 adds) */
-@media (min-width:761px){
-  #founding .sp-terms{margin-top:54px}
-  #featured .sp-phone{margin-top:54px}
-}
-@media (max-width:760px){
-  #founding .sp-terms{margin-left:12px}
-  #featured .sp-phone{margin-left:12px}
-}
+/* ---------- 3) side-by-side pairs — NATURAL heights (v4) ----------
+   v2's manufactured stagger offsets (founding cells stepped 18/36px,
+   featured house card dropped 26px, sponsor-page partners dropped
+   54px, phone insets 12–28px) were REMOVED in v4 — Travis: "don't
+   force the cards to stagger… leaving that giant spacing is kind of
+   weird." The v4 layer at the bottom of this file gives the pairs
+   align-items:start so each card keeps its natural content height;
+   whatever stagger shows is the organic kind, from the cards simply
+   being different sizes. */
 
 /* ---------- fallbacks: no blur support / reduced transparency ---------- */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
@@ -1784,3 +1765,154 @@ html[data-theme="dark"] .page-bg::after{
   color:#fff;white-space:nowrap;line-height:1.2;
 }
 .sp-phone .ms-val.ok{color:#a5ecb6}
+
+/* =====================================================================
+   V4 REVISION (Travis's five fixes on v3, 2026-11-05)
+   1. THEME TOGGLE UNMISSABLE — out of the hero chip row, into the
+      masthead top-right beside the clock: labelled, amber-ringed,
+      44px tap target, high contrast in both themes (it sits on the
+      hero photo, whose scrim is dark in both). On phones the clock
+      hides (base trim) and the toggle stays, top-right, alone.
+   2. STRIP GLIDES + FIRST PAINT FINISHED — the strip's backdrop
+      blur is GONE: a blurred backdrop under a perpetually animating
+      track forces a re-blur of the strip's whole footprint every
+      frame; that was the glitch. The band is now a near-opaque
+      deep-green gradient (no filter), the track stays transform-only
+      (app.js also right-sizes the clones and batches their sync).
+      Reveal is softer and app.js never hides a card that is already
+      on screen; non-Today backgrounds attach lazily (app.js), so
+      first paint downloads one background per theme, not eight.
+   3. SPONSOR RAILS — Today + Events & More: sticky cards in the
+      page margins on wide screens (the margin grows a little to
+      hold them; below 1440px they vanish rather than squeeze), plus
+      ONE sponsor card at the very top of Events & More at all
+      widths. Sold, the rails and the top card ARE the paid
+      placements; unsold, they carry house content — each view keeps
+      exactly ONE paid-format invitation (Today: the founding panel;
+      More: the Featured Local card).
+   4. DOUBLE BRIDGE KILLED — hero keeps the Lewis & Clark Bridge;
+      Today's backgrounds are river photos (day: Rainier dock;
+      dusk: the river-mouth panorama). Rule: no view background may
+      duplicate the hero image in the same theme.
+   5. GREEN BAR — the sticky bar's brand line now reads "Live view"
+      (index.html); the masthead keeps the full name.
+   6. NATURAL STAGGER — v2's offset block (deleted above) is
+      replaced by natural heights: pairs align at the top and size
+      to their own content, and Travel/Outdoors trade their
+      row-locked two-column grid (equal-height rows = voids under
+      short cards — the Outdoors empty spaces Travis flagged) for
+      balanced columns that pack each card at its own height.
+   ===================================================================== */
+
+/* ---------- 1 · theme toggle beside the clock ---------- */
+.hero-side{display:flex;align-items:flex-start;gap:10px}
+.hero-theme-btn{
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  font:inherit;font-size:.92rem;font-weight:800;color:#fff;
+  background:rgba(9,22,13,.72);border:1.5px solid var(--warm-fill);
+  border-radius:999px;padding:10px 16px;min-height:44px;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+  transition:background .15s ease,transform .12s ease;
+}
+.hero-theme-btn:hover{background:rgba(9,22,13,.9)}
+.hero-theme-btn:active{transform:scale(.97)}
+.hero-theme-btn .theme-ico{width:22px;height:22px}
+@media (max-width:560px){
+  .hero-theme-btn{padding:9px 13px;font-size:.86rem;min-height:42px}
+}
+
+/* ---------- 6 · natural stagger ---------- */
+.founding-cells{align-items:start}
+.featured-row{align-items:start}
+@media (min-width:900px){
+  /* balanced columns: cards flow down one column and up the next at
+     their natural heights — no row ever waits for a taller partner.
+     Outdoors flows as ONE column group (no column-span breaks at
+     all): the span breaks chopped it into segments too small to
+     balance, and the short segment left a photo-sized hole under
+     the shorter column — the exact void Travis flagged. Travel
+     keeps two spans (the Leaflet map and the camera-heavy roads
+     card genuinely need the width); its remaining five cards are
+     near-enough in height to balance cleanly. */
+  #view-travel,#view-outdoors{display:block;columns:2;column-gap:20px}
+  #view-travel>*,#view-outdoors>*{break-inside:avoid;margin:0 0 20px}
+  #view-travel .map-card,#view-travel #roads-card{column-span:all}
+}
+
+/* ---------- 2 · strip: no backdrop filter under the animation ---------- */
+.glance-strip{
+  background:linear-gradient(180deg,rgba(19,37,23,.96),rgba(12,24,15,.97));
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+/* softer reveal (app.js also skips cards already on screen) */
+.reveal{transform:translateY(6px)}
+.reveal.inview{transition:opacity .35s ease,transform .35s ease}
+
+/* ---------- 3 · sponsor rails + Events & More top card ---------- */
+.view{position:relative}
+.rail-zone{display:none}
+.sponsor-top{
+  border-radius:var(--radius);padding:20px;
+  border:1px solid #e3cd96;box-shadow:var(--shadow);
+  background:linear-gradient(180deg,rgba(250,238,214,.9),rgba(246,234,208,.82));
+  -webkit-backdrop-filter:blur(12px) saturate(1.2);
+  backdrop-filter:blur(12px) saturate(1.2);
+}
+html[data-theme="dark"] .sponsor-top{background:linear-gradient(180deg,rgba(43,37,20,.9),rgba(32,27,15,.84))}
+.sponsor-top h2{font-family:var(--display);font-size:1.3rem;margin:0 0 8px;line-height:1.25}
+.sponsor-top p{margin:0 0 12px;font-size:.94rem;max-width:75ch}
+.sponsor-top .cell-eyebrow{color:var(--warm);margin:0 0 8px}
+html[data-theme="dark"] .sponsor-top .cell-eyebrow{color:#f2c078}
+.rail-card{
+  width:176px;border-radius:16px;padding:16px 14px;
+  display:flex;flex-direction:column;gap:8px;
+  background:linear-gradient(180deg,rgba(253,250,240,.9),rgba(249,244,229,.82));
+  -webkit-backdrop-filter:blur(12px) saturate(1.25);
+  backdrop-filter:blur(12px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(20,32,16,.10),0 16px 36px rgba(20,32,16,.18);
+}
+html[data-theme="dark"] .rail-card{
+  background:linear-gradient(180deg,rgba(26,43,32,.88),rgba(13,23,16,.82));
+  border-color:rgba(196,226,196,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.4),0 16px 36px rgba(0,0,0,.35);
+}
+.rail-card h3{font-family:var(--display);font-size:1.06rem;line-height:1.25;margin:0}
+.rail-card p{margin:0;font-size:.84rem;color:var(--muted)}
+html[data-theme="dark"] .rail-card p{color:#c9d4bd}
+.rail-card .cell-eyebrow{color:var(--warm);margin:0}
+html[data-theme="dark"] .rail-card .cell-eyebrow{color:#f2c078}
+.rail-cta{
+  margin-top:auto;align-self:flex-start;display:inline-block;text-decoration:none;
+  font-weight:800;font-size:.8rem;border-radius:999px;padding:8px 13px;
+  background:transparent;color:var(--accent-dark);border:1px solid var(--accent);
+}
+html[data-theme="dark"] .rail-cta{color:#cfe0b8;border-color:rgba(196,226,196,.45)}
+@media (min-width:1440px){
+  /* the room is carved only while Today or Events & More is live —
+     the content column trades a little width, the margins gain the
+     cards; every other view keeps the full layout untouched */
+  .views:has(> #view-today:not([hidden])),
+  .views:has(> #view-more:not([hidden])){max-width:1600px;padding-left:204px;padding-right:204px}
+  .rail-zone{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    /* top offset clears the glance strip on Today, so the rails flank
+       content instead of floating over the strip's ends */
+    position:absolute;top:84px;bottom:0;left:-204px;right:-204px;
+    pointer-events:none;z-index:4;
+  }
+  .rail-card{position:sticky;top:112px;pointer-events:auto;flex:none}
+}
+/* rail + top-card fallbacks, same discipline as the cards */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .rail-card,.sponsor-top{background:#fbf8ee}
+  html[data-theme="dark"] .rail-card,html[data-theme="dark"] .sponsor-top{background:#16211a}
+}
+@media (prefers-reduced-transparency:reduce){
+  .rail-card,.sponsor-top{backdrop-filter:none;-webkit-backdrop-filter:none;background:#fbf8ee}
+  html[data-theme="dark"] .rail-card,html[data-theme="dark"] .sponsor-top{background:#16211a}
+}
+@media print{
+  .rail-zone{display:none!important}
+}

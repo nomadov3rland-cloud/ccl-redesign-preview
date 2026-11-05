@@ -6744,7 +6744,16 @@ function initReveal() {
       if (en.isIntersecting) { en.target.classList.add('inview'); io.unobserve(en.target); }
     });
   }, { rootMargin: '0px 0px -6% 0px', threshold: 0.04 });
-  els.forEach(el => { el.classList.add('reveal'); io.observe(el); });
+  /* v4 load pass (Travis: first open "loaded in really slowly and
+     looked kind of weird"): a card already on screen at setup never
+     gets the hidden start state, so first paint reads finished
+     instead of assembling itself. Only below-the-fold cards fade. */
+  const vh = window.innerHeight || 0;
+  els.forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (r.top < vh && r.bottom > 0) return;
+    el.classList.add('reveal'); io.observe(el);
+  });
 }
 initReveal();
 
@@ -6885,8 +6894,12 @@ langSet = function (lang) {
 /* ---------- Redesign prototype 2026-11-05: theme toggle wiring ----------
    The theme itself is set before paint by the inline script in
    index.html (saved choice > OS prefers-color-scheme). This wires the
-   pill in the masthead chip row: icon + label flip, aria-pressed,
-   theme-color meta, and persisting the choice in localStorage. */
+   masthead button: since v4 it sits at the top-right beside the clock
+   (in v3 it was the first pill in the hero chip row, where Travis had
+   to hunt for it). Icon + label flip, aria-pressed, theme-color meta,
+   and persisting the choice in localStorage. The label names the mode
+   you switch TO ("Dark" while light, "Light" while dark), matching
+   the aria-label. */
 (function initThemeToggle() {
   var btn = document.getElementById('theme-btn'); if (!btn) return;
   var label = document.getElementById('theme-btn-label');
@@ -6932,7 +6945,19 @@ langSet = function (lang) {
     return;
   }
 
+  /* v4 smoothness: clone only as much loop as the screen needs — two
+     identical halves, each at least one viewport wide (capped at 4
+     sets). v3's fixed 3 sets per half built a ~10,000px-wide track on
+     desktop; oversized composited layers are a classic phone-jank
+     source. Measured before fonts settle this can only undershoot,
+     and the ceil() rounds up, so the loop stays seamless. */
+  var setW = 0;
+  items.forEach(function (el) { setW += el.offsetWidth || 0; });
   var SETS_PER_HALF = 3;
+  if (setW > 0) {
+    SETS_PER_HALF = Math.min(4, Math.max(1,
+      Math.ceil(Math.max(window.innerWidth || 0, setW) / setW)));
+  }
   var clones = items.map(function () { return []; });
   function makeClone(src, j) {
     var c = src.cloneNode(true);
@@ -6955,13 +6980,34 @@ langSet = function (lang) {
   }
   items.forEach(function (src, j) {
     if (!window.MutationObserver || !clones[j].length) return;
-    var sync = function () {
+    /* v4: the sync is coalesced through requestAnimationFrame and
+       skipped entirely when the item's visible signature — value
+       text, value status class, sub text — has not actually changed.
+       Data polls rewrite nodes more often than readings change, and
+       every needless innerHTML swap across the clones is main-thread
+       work in the middle of the scroll Travis called glitchy. The
+       signature re-queries the live nodes each time, so it stays
+       correct even if a module rebuilds an item's children. */
+    var lastSig = null, queued = false;
+    function signature() {
+      var v = src.querySelector('.glance-val');
+      var s = src.querySelector('.glance-sub');
+      return (v ? v.textContent + '' + v.className : '') + '|' +
+             (s ? s.textContent : '');
+    }
+    function sync() {
+      queued = false;
+      var sig = signature();
+      if (sig === lastSig) return;
+      lastSig = sig;
       clones[j].forEach(function (c) {
         c.innerHTML = src.innerHTML;
         c.className = src.className + ' strip-clone';
       });
-    };
-    new MutationObserver(sync).observe(src, {
+    }
+    new MutationObserver(function () {
+      if (!queued) { queued = true; requestAnimationFrame(sync); }
+    }).observe(src, {
       subtree: true, childList: true, characterData: true,
       attributes: true, attributeFilter: ['class']
     });
@@ -7021,7 +7067,9 @@ langSet = function (lang) {
    single short crossfade (the portfolio pattern: imagery swaps on
    user action, e.g. the detailing demo's service figure). View
    switching toggles the sections' hidden attribute (cclShowView), so
-   a MutationObserver on that attribute is the whole mechanism. */
+   a MutationObserver on that attribute drives the swap; since v4 the
+   non-Today layers' photos are attached lazily (see ensure() below)
+   so first paint downloads one background per theme, not eight. */
 (function () {
   var layers = Array.prototype.slice.call(document.querySelectorAll('.page-bg .bg-layer[data-bg-view]'));
   if (!layers.length) return;
@@ -7032,11 +7080,30 @@ langSet = function (lang) {
     }
     return 'today';
   }
+  /* v4 load pass: only Today's two layers carry an inline photo.
+     Every other layer's URL waits in data-bg-src and is attached
+     here — the moment its view opens, or at idle after first paint,
+     whichever comes first — so the initial download is the hero plus
+     ONE background per theme instead of eight photographs. */
+  function ensure(l) {
+    var s = l.getAttribute('data-bg-src');
+    if (s && !l.style.backgroundImage) {
+      l.style.backgroundImage = 'url("' + s + '")';
+      l.removeAttribute('data-bg-src');
+    }
+  }
   function apply() {
     var name = current();
-    layers.forEach(function (l) { l.classList.toggle('on', l.getAttribute('data-bg-view') === name); });
+    layers.forEach(function (l) {
+      var on = l.getAttribute('data-bg-view') === name;
+      if (on) ensure(l);
+      l.classList.toggle('on', on);
+    });
   }
   apply();
+  function warmRest() { layers.forEach(ensure); }
+  if (window.requestIdleCallback) requestIdleCallback(warmRest, { timeout: 2500 });
+  else window.addEventListener('load', function () { setTimeout(warmRest, 400); });
   if (window.MutationObserver) {
     var mo = new MutationObserver(apply);
     views.forEach(function (v) { mo.observe(v, { attributes: true, attributeFilter: ['hidden', 'class'] }); });

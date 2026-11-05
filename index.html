@@ -31,26 +31,40 @@ document.documentElement.setAttribute("data-theme",t);})();
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="img/icons/icon-logo-pine.png">
+<!-- v4 load pass: the two Today backgrounds (one per theme) are the
+     only page backgrounds first paint needs — warm them with the hero.
+     Every other view's photo is lazy-attached by app.js. -->
+<link rel="preload" as="image" href="img/bg/bg-day-6.jpg">
+<link rel="preload" as="image" href="img/bg/bg-dusk-2.jpg">
 </head>
 <body>
 
-<!-- v3: full-page county photo background — CALM. One strong static
+<!-- v4: full-page county photo background — CALM. One strong static
      photo per view (portfolio pattern: imagery changes only when the
      view or the theme changes, never on a timer). Day set in light
      mode, verified dusk pool in dark mode; app.js lights the layer
-     whose data-bg-view matches the visible view. -->
+     whose data-bg-view matches the visible view.
+     RULE (Travis, v4): no view background may duplicate the hero image
+     in the same theme. The hero keeps the Lewis & Clark Bridge, so
+     Today's backgrounds are river photos instead: the Rainier dock
+     (day) and the river-mouth panorama (dusk) — in v3 both were the
+     bridge, and in dark mode literally the hero's own photo.
+     Only Today's two layers are inline; the other views' photos ride
+     in data-bg-src and are attached by app.js after first paint (or
+     the moment their view opens), so first load carries ONE
+     background per theme, not eight photos at once. -->
 <div class="page-bg" aria-hidden="true">
   <div class="bg-stack bg-day">
-    <div class="bg-layer on" data-bg-view="today" style="background-image:url('img/bg/bg-day-1.jpg')"></div>
-    <div class="bg-layer" data-bg-view="travel" style="background-image:url('img/bg/bg-day-4.jpg')"></div>
-    <div class="bg-layer" data-bg-view="outdoors" style="background-image:url('img/bg/bg-day-3.jpg')"></div>
-    <div class="bg-layer" data-bg-view="more" style="background-image:url('img/bg/bg-day-5.jpg')"></div>
+    <div class="bg-layer on" data-bg-view="today" style="background-image:url('img/bg/bg-day-6.jpg')"></div>
+    <div class="bg-layer" data-bg-view="travel" data-bg-src="img/bg/bg-day-4.jpg"></div>
+    <div class="bg-layer" data-bg-view="outdoors" data-bg-src="img/bg/bg-day-3.jpg"></div>
+    <div class="bg-layer" data-bg-view="more" data-bg-src="img/bg/bg-day-5.jpg"></div>
   </div>
   <div class="bg-stack bg-dusk">
-    <div class="bg-layer on" data-bg-view="today" style="background-image:url('img/bg/bg-dusk-1.jpg')"></div>
-    <div class="bg-layer" data-bg-view="travel" style="background-image:url('img/bg/bg-dusk-5.jpg')"></div>
-    <div class="bg-layer" data-bg-view="outdoors" style="background-image:url('img/bg/bg-dusk-3.jpg')"></div>
-    <div class="bg-layer" data-bg-view="more" style="background-image:url('img/bg/bg-dusk-4.jpg')"></div>
+    <div class="bg-layer on" data-bg-view="today" style="background-image:url('img/bg/bg-dusk-2.jpg')"></div>
+    <div class="bg-layer" data-bg-view="travel" data-bg-src="img/bg/bg-dusk-5.jpg"></div>
+    <div class="bg-layer" data-bg-view="outdoors" data-bg-src="img/bg/bg-dusk-3.jpg"></div>
+    <div class="bg-layer" data-bg-view="more" data-bg-src="img/bg/bg-dusk-4.jpg"></div>
   </div>
 </div>
 
@@ -66,15 +80,20 @@ document.documentElement.setAttribute("data-theme",t);})();
           <p class="tagline" data-i18n="tagline">Roads · Rivers · Weather · Ferry — Columbia County, Oregon</p>
         </div>
       </div>
-      <div class="header-clock">
-        <div id="clock" class="clock">—</div>
-        <div class="clock-label" data-i18n="clocklabel">Pacific Time</div>
+      <div class="hero-side">
+        <div class="header-clock">
+          <div id="clock" class="clock">—</div>
+          <div class="clock-label" data-i18n="clocklabel">Pacific Time</div>
+        </div>
+        <!-- v4: the theme toggle lives HERE now — top-right, beside the
+             clock, labelled and amber-ringed. In v3 it was the first
+             pill in the chip row below and Travis had to hunt for it. -->
+        <button class="theme-toggle hero-theme-btn" id="theme-btn" type="button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch between light and dark mode"><img class="theme-ico" src="img/icons/icon-theme.png" alt="" aria-hidden="true"><span id="theme-btn-label">Dark</span></button>
       </div>
     </div>
     <h1 class="hero-title" data-i18n="herotitle">Everything happening in the county, <em>one live look.</em></h1>
     <p class="hero-promise" data-i18n="heropromise">US-30 and the Lewis &amp; Clark Bridge, Columbia River levels, weather alerts, the Oscar B ferry, and this week's events — gathered from official public sources and refreshed all day.</p>
     <nav class="status-strip" aria-label="Jump to a section">
-      <button class="lang-pill theme-toggle" id="theme-btn" type="button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch between light and dark mode"><img class="theme-ico" src="img/icons/icon-theme.png" alt="" aria-hidden="true"><span id="theme-btn-label">Dark</span></button>
       <a href="#roads-card" data-i18n="striproads"><span class="pulse-dot" aria-hidden="true"></span>Roads &amp; bridge</a>
       <a href="#rivers-card" data-i18n="striprivers">🌊 River levels</a>
       <a href="#alerts-card" data-i18n="stripalerts">⚠️ Weather alerts</a>
@@ -94,7 +113,9 @@ document.documentElement.setAttribute("data-theme",t);})();
 </nav>
 
 <div class="sticky-bar" id="sticky-bar">
-  <span class="sticky-brand"><img class="sticky-ico" src="img/icons/icon-logo-pine.png" alt="" aria-hidden="true"> County Live</span>
+  <!-- v4: the green bar no longer repeats the masthead's name — it
+       says what this bar is: the live view, condensed. -->
+  <span class="sticky-brand"><img class="sticky-ico" src="img/icons/icon-logo-pine.png" alt="" aria-hidden="true"> Live view</span>
   <a class="sticky-pill" id="sticky-weather" href="#alerts-card">⚠️ Weather —</a>
   <a class="sticky-pill" id="sticky-bridge" href="#roads-card">🌉 Bridge —</a>
   <nav class="sticky-links" aria-label="Jump to a section">
@@ -112,6 +133,27 @@ document.documentElement.setAttribute("data-theme",t);})();
 <main class="views">
 
 <section class="view" id="view-today" data-view="today" aria-label="Today — the county at a glance">
+
+<!-- v4: sponsor rails — wide screens only, sticky in the page margins
+     (CSS in the v4 layer; the margins grow a little to hold them and
+     they vanish entirely below 1440px). SOLD, these two cards are paid
+     placements. While unsold they carry house content only — this
+     view's ONE paid-format invitation is the founding panel below,
+     never a second "your logo here" box. -->
+<div class="rail-zone" aria-label="Sponsor spaces">
+  <aside class="rail-card rail-left">
+    <p class="cell-eyebrow">Never miss a change</p>
+    <h3>Get told when the county changes</h3>
+    <p>The County Watch checks the National Weather Service, the bridge and the ferry every two minutes while this page is open — and tells you the moment something new posts.</p>
+    <a class="rail-cta" href="#watch-card">Start the County Watch &rarr;</a>
+  </aside>
+  <aside class="rail-card rail-right">
+    <p class="cell-eyebrow">Community notice</p>
+    <h3>Free placement for local nonprofits</h3>
+    <p>This space rotates free notices for Columbia County nonprofits — food banks, libraries, volunteer fire &amp; EMS recruitment. A community service, not an ad.</p>
+    <a class="rail-cta" href="sponsor.html#community">How community notices work &rarr;</a>
+  </aside>
+</div>
 
 <!-- v3: the glance board is one CONTINUOUS full-width strip — all four
      live answers flow right-to-left in a single repeating stream
@@ -602,6 +644,33 @@ document.documentElement.setAttribute("data-theme",t);})();
 </section>
 
 <section class="view" id="view-more" data-view="more" aria-label="Events and more" hidden>
+
+<!-- v4: sponsor rails (wide screens, sticky — same system as Today)
+     plus ONE sponsor card at the very top of the view, all widths.
+     Sold, the top card and both rails are paid placements. Unsold,
+     they carry house content only — this view's ONE paid-format
+     invitation stays the Featured Local card further down. -->
+<div class="rail-zone" aria-label="Sponsor spaces">
+  <aside class="rail-card rail-left">
+    <p class="cell-eyebrow">From the site</p>
+    <h3>This weekend in Columbia County</h3>
+    <p>Markets, games, bazaars and boats — everything on the county&rsquo;s calendars for the next few days, in one list.</p>
+    <a class="rail-cta" href="#events-card">See what&rsquo;s on &rarr;</a>
+  </aside>
+  <aside class="rail-card rail-right">
+    <p class="cell-eyebrow">Never miss a change</p>
+    <h3>Get told when the county changes</h3>
+    <p>The County Watch checks the National Weather Service, the bridge and the ferry every two minutes while this page is open — and tells you the moment something new posts.</p>
+    <a class="rail-cta" href="#watch-card">Start the County Watch &rarr;</a>
+  </aside>
+</div>
+
+<section class="sponsor-top" aria-label="Sponsor spotlight — the local businesses that keep this page free">
+  <p class="cell-eyebrow">Sponsor spotlight</p>
+  <h2>The local businesses that keep this page free</h2>
+  <p>Columbia County Live carries no ad network and no paywall — a small number of local businesses fund it with named spots like this one. The first three become Founding Sponsors: their names stay on the Today page for good, at a $49/mo rate that never rises while they&rsquo;re with us. <strong>0 of 3 claimed so far.</strong></p>
+  <a class="founding-cta" href="sponsor.html#founding">See the founding sponsor spots &rarr;</a>
+</section>
 
 <div class="card photo-card" id="events-card">
       <div class="card-photo photo-courthouse"><img src="img/card-courthouse.jpg" alt="The historic Columbia County Courthouse in St. Helens, Oregon" loading="lazy" decoding="async"><img class="photo-night" src="img/dusk/events-night.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div>

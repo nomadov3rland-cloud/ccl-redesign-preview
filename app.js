@@ -897,13 +897,45 @@ async function loadBend() {
       } catch (e) { /* the weather line is a bonus; cameras + incidents still render */ }
     }
     const inc = (area.incidents || []).map(incidentRow).join('');
-    const cams = (area.cameras || []).length
-      ? '<div class="route-strip">' + area.cameras.map(c =>
-          '<figure class="camera-fig">'
-          + (c.image_url ? '<img loading="lazy" src="' + src(c.image_url) + '" alt="Pass camera: ' + esc(c.name) + '" onerror="this.parentNode.classList.add(\'cam-dead\');this.remove();">' : '')
-          + '<figcaption>' + esc(c.name) + '</figcaption></figure>').join('') + '</div>'
+    const camFig = (c, lead) =>
+      '<figure class="camera-fig' + (lead ? ' bend-lead' : '') + '">'
+      + (c.image_url ? '<img loading="lazy" src="' + src(c.image_url) + '" alt="Pass camera: ' + esc(c.name) + '" onerror="this.parentNode.classList.add(\'cam-dead\');this.remove();">' : '')
+      + '<figcaption>' + esc(c.name)
+      + (lead ? '<span class="cam-dist">' + c.__distMi.toFixed(1) + ' mi from the summit</span>' : '')
+      + '</figcaption></figure>';
+    /* v6: the Mt. Hood section leads with its SUMMIT PAIR — the two
+       Government Camp cameras nearest the pass summit anchor the code
+       already defines (PASS_POINTS.govcamp), shown large. Selection is
+       computed, never hand-picked: haversine distance from the anchor
+       to each camera's own lat/lon in this same snapshot; the two
+       smallest distances lead and leave the strip, the rest of the
+       cameras follow below as before. Cameras without coordinates in
+       the snapshot simply stay in the strip. */
+    let featured = '';
+    let stripCams = area.cameras || [];
+    if (area.id === 'govcamp' && pt && stripCams.length > 2) {
+      const R = 3958.8, rad = Math.PI / 180;
+      const scored = stripCams.map(c => {
+        if (typeof c.lat !== 'number' || typeof c.lon !== 'number') return { c, d: Infinity };
+        const dp = (c.lat - pt.lat) * rad, dl = (c.lon - pt.lon) * rad;
+        const h = Math.pow(Math.sin(dp / 2), 2)
+          + Math.cos(pt.lat * rad) * Math.cos(c.lat * rad) * Math.pow(Math.sin(dl / 2), 2);
+        return { c, d: 2 * R * Math.asin(Math.sqrt(h)) };
+      }).sort((a, b) => a.d - b.d);
+      const lead = scored.slice(0, 2).filter(s => isFinite(s.d));
+      if (lead.length === 2) {
+        lead.forEach(s => { s.c.__distMi = s.d; });
+        const leadSet = new Set(lead.map(s => s.c));
+        featured = '<p class="bend-summit-note">📍 Closest to the summit — the two Government Camp cameras nearest the pass, shown large. The rest follow below.</p>'
+          + '<div class="bend-featured">' + lead.map(s => camFig(s.c, true)).join('') + '</div>';
+        stripCams = stripCams.filter(c => !leadSet.has(c));
+      }
+    }
+    const cams = stripCams.length
+      ? '<div class="route-strip">' + stripCams.map(c => camFig(c, false)).join('') + '</div>'
       : '';
     return '<div class="bend-area"><h3 class="subhead">' + esc(area.name) + '</h3>' + wx
+      + featured
       + (inc || '<p class="no-alerts">✅ No ODOT incidents reported on this stretch in the latest snapshot.</p>')
       + cams + '</div>';
   }));
@@ -5775,6 +5807,8 @@ const LANG_ES = {
   dirhonest: '<strong>Los anuncios son publicidad, no recomendaciones.</strong> No hemos verificado estos servicios — en especial para servicios dentro del hogar, pide referencias antes de contratar.',
   dircta: 'Anuncia tu servicio — gratis durante el lanzamiento fundador &rarr;',
   dirctanote: 'La solicitud usa el mismo formulario corto que las de patrocinadores. Cada anuncio lo lee una persona y se revisa antes de aparecer — nada se publica automáticamente y no hay pago en línea.',
+  displaybtn: 'Pantalla',
+  displaylabel: 'Abrir el modo pantalla — el salvapantallas comunitario',
   footerbyline: '<strong>Columbia County Live</strong> — por <strong>Nomad Development Group</strong>',
   footerdata: 'Datos: Servicio Meteorológico Nacional · Servicio Geológico de EE. UU. (USGS) · NOAA Tides &amp; Currents (mareas del río) · NOAA nowCOAST (radar) · NIFC WFIGS (incendios forestales) · colaboradores de adsb.fi (aviones, ODbL) · wheretheiss.at (posición de la EEI) · CelesTrak / NORAD (órbita de la EEI, para predicciones de paso) · Open-Meteo / Copernicus CAMS (modelo de calidad del aire) · Fish Passage Center y Columbia Basin Research DART (conteos de peces en las presas — datos del Cuerpo de Ingenieros del Ejército de EE. UU.) · colaboradores de OpenStreetMap. Los datos de captura (carreteras, cámaras, puente, alertas del ferry, eventos, tráfico del río) los recoge un pequeño programa recolector de los operadores oficiales — ODOT TripCheck, WSDOT, el condado de Wahkiakum y los calendarios de las ciudades y el condado — y se etiquetan con la hora en que se recogieron. El modelo de capas de rastreo en vivo está inspirado en God&rsquo;s Eye View (código abierto, de Bilawal Sidhu), cuyo DATA_SOURCES.md nos señaló varias de estas fuentes públicas.',
   footerdisc: 'Esta página reúne datos públicos por conveniencia. Antes de viajar con clima severo o agua alta, confirma las condiciones con las fuentes oficiales enlazadas arriba.',
@@ -7030,6 +7064,15 @@ function initDrawer() {
     if (window.CCLOpenSaver) window.CCLOpenSaver();
     else { const sb = $('saver-start-btn'); if (sb) sb.click(); }
   });
+  /* v6: the masthead Display button — display mode is one tap from
+     first paint on every view, not buried in a card or the drawer.
+     Same opener, same gesture chain (the click is what lets the
+     saver ask for fullscreen). */
+  const dispBtn = $('display-btn');
+  if (dispBtn) dispBtn.addEventListener('click', () => {
+    if (window.CCLOpenSaver) window.CCLOpenSaver();
+    else { const sb = $('saver-start-btn'); if (sb) sb.click(); }
+  });
 }
 initDrawer();
 
@@ -7478,6 +7521,12 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
       es: 'Estas fotografías vienen del propio condado — comparte la tuya desde la pestaña Eventos y Más' },
     null /* a beat of nothing — the quiet line rests every third photo */
   ];
+  /* v6: the quiet line is a rotation marched by the PHOTOS, not a
+     lookup and not a timer — quietIdx advances exactly once per photo
+     change (showPhoto's timed advance), so the sponsor line, the
+     photo invitation and the blank beat take turns in step with the
+     pictures. Future sponsors slot into QUIET and join the march. */
+  var quietIdx = 0;
   var FALLBACK_POOL = [
     { src: 'img/bg/bg-day-1.jpg',  credit: 'Gary Halvorson, Oregon State Archives', location: 'Lewis & Clark Bridge — Rainier' },
     { src: 'img/bg/bg-day-6.jpg',  credit: 'Kingofthedead', location: 'The dock at Rainier, on the Columbia' },
@@ -7620,12 +7669,16 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
       ? '<span class="saver-credit-name">' + escHtml(p.credit) + '</span>' +
         (p.location ? '<span class="saver-credit-loc">' + escHtml(p.location) + '</span>' : '')
       : '';
-    var q = QUIET[poolIdx % QUIET.length];
+    var q = QUIET[quietIdx % QUIET.length];
     var qEl = document.getElementById('saver-quiet');
     if (qEl) qEl.textContent = q ? q[langCur === 'es' ? 'es' : 'en'] : '';
   }
   function showPhoto(idx, instant) {
     if (!pool.length) return;
+    /* a real advance (the 16-second tick) — and ONLY that — moves the
+       quiet sponsor rotation to its next entry; opens, language flips
+       and pool repaints are instant and keep the current entry */
+    if (!instant) quietIdx++;
     poolIdx = ((idx % pool.length) + pool.length) % pool.length;
     var p = pool[poolIdx];
     var front = document.getElementById(frontIsA ? 'saver-photo-a' : 'saver-photo-b');
@@ -7666,25 +7719,85 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
     if (d) d.textContent = new Intl.DateTimeFormat(loc, {
       timeZone: 'America/Los_Angeles', weekday: 'long', month: 'long', day: 'numeric' }).format(now);
   }
+  /* v6: the pinned answers SCROLL — a slow, continuous right-to-left
+     stream across the bottom of the display, built with the main
+     glance strip's own technique (a max-content track holding two
+     identical sets, animated transform-only to -50%). Same glass
+     tiles, same across-the-room type. Exactly one pin — or a visitor
+     who asked for reduced motion — gets a static centered row
+     instead. The 5-second refresh patches values in place when the
+     pin set is unchanged, so the stream never restarts under the
+     reader; a changed pin set or language rebuilds it. */
+  function saverTile(a) {
+    var v = a.val();
+    return '<div class="saver-answer">'
+      + '<div class="saver-answer-label"><img src="' + a.icon + '" alt="" aria-hidden="true"> ' + esc(a.label()) + '</div>'
+      + '<div class="saver-answer-val' + (v && v.length > 56 ? ' xlong' : v && v.length > 24 ? ' long' : '') + '">' + esc(v || '—') + '</div>'
+      + (a.sub() ? '<div class="saver-answer-sub">' + esc(a.sub()) + '</div>' : '')
+      + '</div>';
+  }
+  function patchSaverTile(tile, a) {
+    var v = a.val();
+    var valEl = tile.querySelector('.saver-answer-val');
+    if (valEl) {
+      valEl.textContent = v || '—';
+      valEl.className = 'saver-answer-val' + (v && v.length > 56 ? ' xlong' : v && v.length > 24 ? ' long' : '');
+    }
+    var s = a.sub();
+    var subEl = tile.querySelector('.saver-answer-sub');
+    if (subEl && s) subEl.textContent = s;
+    else if (subEl && !s) subEl.remove();
+    else if (!subEl && s) {
+      var d = document.createElement('div');
+      d.className = 'saver-answer-sub';
+      d.textContent = s;
+      tile.appendChild(d);
+    }
+  }
   function renderSaverAnswers() {
     var wrap = document.getElementById('saver-answers');
     if (!wrap) return;
     var shown = ANSWERS.filter(function (a) { return isPinned(a.id); });
     if (!shown.length) {
+      wrap.dataset.sig = '';
+      wrap.classList.remove('scrolling');
+      wrap.classList.add('is-static');
       wrap.innerHTML = '<div class="saver-answer saver-answer-none"><div class="saver-answer-val">'
         + (langCur === 'es' ? 'Sin respuestas fijadas' : 'No answers pinned') + '</div>'
         + '<div class="saver-answer-sub">'
         + (langCur === 'es' ? 'Fija las tuyas desde la pestaña Eventos y Más' : 'Pin yours from the Events &amp; More tab') + '</div></div>';
       return;
     }
-    wrap.innerHTML = shown.map(function (a) {
-      var v = a.val();
-      return '<div class="saver-answer">'
-        + '<div class="saver-answer-label"><img src="' + a.icon + '" alt="" aria-hidden="true"> ' + esc(a.label()) + '</div>'
-        + '<div class="saver-answer-val' + (v && v.length > 56 ? ' xlong' : v && v.length > 24 ? ' long' : '') + '">' + esc(v || '—') + '</div>'
-        + (a.sub() ? '<div class="saver-answer-sub">' + esc(a.sub()) + '</div>' : '')
-        + '</div>';
-    }).join('');
+    var sig = shown.map(function (a) { return a.id; }).join(',') + '|' + langCur;
+    var reduced = false;
+    try { reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { /* assume motion ok */ }
+    if (shown.length < 2 || reduced) {
+      if (wrap.dataset.sig === sig && wrap.classList.contains('is-static')) {
+        var tiles = wrap.querySelectorAll('.saver-answer');
+        shown.forEach(function (a, i) { if (tiles[i]) patchSaverTile(tiles[i], a); });
+        return;
+      }
+      wrap.dataset.sig = sig;
+      wrap.classList.remove('scrolling');
+      wrap.classList.add('is-static');
+      wrap.innerHTML = shown.map(saverTile).join('');
+      return;
+    }
+    if (wrap.dataset.sig === sig && wrap.classList.contains('scrolling')) {
+      var all = wrap.querySelectorAll('.saver-answer');
+      all.forEach(function (tile, i) { patchSaverTile(tile, shown[i % shown.length]); });
+      return;
+    }
+    wrap.dataset.sig = sig;
+    wrap.classList.remove('is-static');
+    wrap.classList.add('scrolling');
+    var set = shown.map(saverTile).join('');
+    /* one full set passes in ~13s per answer — a calm, readable drift */
+    var dur = Math.max(26, shown.length * 13);
+    wrap.innerHTML = '<div class="saver-scroll-viewport"><div class="saver-scroll-track" style="animation-duration:' + dur + 's">'
+      + '<div class="saver-scroll-set">' + set + '</div>'
+      + '<div class="saver-scroll-set" aria-hidden="true">' + set + '</div>'
+      + '</div></div>';
   }
 
   /* ----- open / close: unattended, gestureless-tolerant ----- */
@@ -7901,4 +8014,49 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
     langSetDirPrev(lang);
     renderDir();
   };
+})();
+
+/* ---------- v6: mobile sponsor spacing (Today) ----------
+   Research rule: no cluttered above-the-fold ad stacks on phones —
+   sponsor-format cards belong BETWEEN content modules, and a view
+   keeps ONE true invitation up top. At phone widths (where the
+   founding panel stacks into a single column, ≤760px) the panel
+   keeps only the founding invitation; its two house cells — County
+   Watch and the nonprofit notice — move down into Today's flow,
+   spaced between content sections: County Watch lands just before
+   Tonight & Tomorrow, the nonprofit notice just before the County
+   Briefing. They are never adjacent to each other or to the panel.
+   Wider layouts are untouched — the full panel and the rails stay
+   exactly as built. The cells are MOVED, never duplicated, so ids,
+   links and reading order stay single and honest at every width. */
+(function initMobileSponsorSpacing() {
+  var watch = document.getElementById('founding-cell-watch');
+  var nonp = document.getElementById('founding-cell-nonprofit');
+  var plan = document.getElementById('plan-card');
+  var briefing = document.getElementById('briefing-card');
+  if (!watch || !nonp || !plan || !briefing || !plan.parentNode || !briefing.parentNode) return;
+  var homes = [watch, nonp].map(function (el) {
+    return { el: el, parent: el.parentNode, next: el.nextSibling };
+  });
+  var mq = null;
+  try { mq = window.matchMedia('(max-width: 760px)'); } catch (e) { /* no mq: desktop layout stands */ }
+  function apply() {
+    if (mq && mq.matches) {
+      watch.classList.add('in-flow');
+      nonp.classList.add('in-flow');
+      plan.parentNode.insertBefore(watch, plan);
+      briefing.parentNode.insertBefore(nonp, briefing);
+    } else {
+      homes.forEach(function (h) {
+        h.el.classList.remove('in-flow');
+        if (h.next && h.next.parentNode === h.parent) h.parent.insertBefore(h.el, h.next);
+        else h.parent.appendChild(h.el);
+      });
+    }
+  }
+  apply();
+  if (mq) {
+    if (mq.addEventListener) mq.addEventListener('change', apply);
+    else if (mq.addListener) mq.addListener(apply);
+  }
 })();

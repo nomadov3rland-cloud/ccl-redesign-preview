@@ -2139,3 +2139,106 @@ html[data-theme="dark"] .drawer-photo-line{color:#d8dfc8}
 .saver-answer-val{-webkit-line-clamp:3}
 .saver-answer-val.long{font-size:clamp(1.02rem,2.3vw,1.55rem);line-height:1.16;-webkit-line-clamp:4}
 .saver-answer-val.xlong{font-size:clamp(.92rem,1.9vw,1.28rem);line-height:1.14;-webkit-line-clamp:5}
+
+/* =====================================================================
+   ===== V6 REVISION (Travis, 2026-11-05) =====
+   Display in the masthead, a scrolling saver, photo-synced sponsor
+   rotation, mobile sponsor spacing, the Bend summit pair, and the
+   photo-top treatment spread — a little bit more, not everywhere.
+   ===================================================================== */
+
+/* --- 1 · the masthead Display button --------------------------------
+   Same pill as the theme toggle (dark glass, amber ring) so the right
+   cluster reads as one instrument row; the monitor glyph is drawn in
+   light amber to tell it apart at a glance. The word stays — phones
+   down to 360px fit clock + Display + Dark (the clock's text hides
+   first, per the existing ≤560px rule, before any label would). */
+.display-btn svg.theme-ico{color:#f2c078}
+@media (max-width:380px){
+  .display-btn{padding:9px 11px}
+}
+
+/* --- 2 · the saver's answers scroll ---------------------------------
+   The glance strip's technique at across-the-room scale: a viewport,
+   a max-content track of two identical sets, transform-only to -50%.
+   The bottom scrim already darkens toward the answers; the edge mask
+   lets tiles dissolve at the frame instead of popping. */
+.saver-answers.scrolling{display:block;padding:0}
+.saver-scroll-viewport{
+  overflow:hidden;width:100%;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 3.5%,#000 96.5%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 3.5%,#000 96.5%,transparent);
+}
+.saver-scroll-track{display:flex;width:max-content;animation:saverScroll 60s linear infinite;will-change:transform}
+.saver-scroll-set{display:flex;gap:14px;padding-right:14px;align-items:stretch}
+.saver-scroll-set .saver-answer{flex:none;width:min(330px,76vw);max-width:none}
+@keyframes saverScroll{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){
+  .saver-scroll-track{animation:none}
+}
+
+/* --- 4 · founding house cells, spaced through Today's flow ----------
+   On phones the two house cells leave the panel (app.js moves them)
+   and stand as their own deep-green glass panels between content
+   sections — the founding panel's own material, so they still read
+   as sponsor-format cards, just no longer stacked at the top. */
+.founding-cell.in-flow{
+  background:linear-gradient(180deg,rgba(24,40,26,.93),rgba(14,24,16,.96));
+  border:1px solid rgba(233,164,74,.45);border-radius:18px;
+  padding:20px;color:#f5efdd;box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(10px) saturate(1.1);backdrop-filter:blur(10px) saturate(1.1);
+}
+
+/* --- 5 · the Bend run summit pair ------------------------------------
+   Two large lead cameras under the Mt. Hood subhead; the figcaption
+   carries the computed distance from the summit anchor. */
+.bend-summit-note{font-size:.9rem;font-weight:600;margin:8px 0 8px}
+.bend-featured{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}
+.bend-featured .camera-fig img{height:190px}
+.bend-lead figcaption{font-size:.84rem}
+.cam-dist{display:block;font-weight:700;color:var(--accent-dark)}
+@media (max-width:560px){
+  .bend-featured .camera-fig img{height:118px}
+}
+
+/* --- 6 · photo-tops (treatment A) — the Events card's pattern --------
+   One new header band per view cluster, hung on the existing
+   .card-photo machinery (same height, same bottom fade). */
+.photo-summit img{object-position:center 34%}
+.photo-fish img{object-position:center 58%}
+.photo-pier img{object-position:center 63%}
+
+/* --- 6 · photo-behind-text (treatment B) ------------------------------
+   The photo fills the card's interior; a DIRECTIONAL scrim carries
+   the words — heavy where the text sits, lighter where the picture
+   can breathe. Readability is the gate: the saver card's scrim stays
+   near-opaque in both themes, and Featured Local's cards go glass
+   over a warm dark wash. */
+.photo-behind{position:relative;overflow:hidden;isolation:isolate}
+.card-bgphoto{position:absolute;inset:0;z-index:0}
+.card-bgphoto img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-behind>*:not(.card-bgphoto){position:relative;z-index:1}
+/* the Community Screensaver card — a pool photo (the river-mouth
+   panorama the saver itself cycles) behind the words */
+.saver-card .card-bgphoto::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(243,238,222,.95),rgba(243,238,222,.9) 55%,rgba(243,238,222,.94));
+}
+html[data-theme="dark"] .saver-card .card-bgphoto::after{
+  background:linear-gradient(180deg,rgba(10,17,12,.92),rgba(10,17,12,.88) 55%,rgba(10,17,12,.93));
+}
+/* Featured Local — the 1973 Columbia-mouth sunset behind glass cards */
+.featured-local.photo-behind{background:#2a2118}
+.featured-local .card-bgphoto::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(30,24,12,.4),rgba(30,24,12,.55));
+}
+.featured-local.photo-behind .featured-title{color:#f8f2df;text-shadow:0 1px 10px rgba(20,14,4,.6)}
+.featured-local.photo-behind .featured-card{
+  background:rgba(251,248,238,.9);
+  -webkit-backdrop-filter:blur(9px) saturate(1.1);backdrop-filter:blur(9px) saturate(1.1);
+}
+html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:rgba(19,30,22,.9)}
+@media print{
+  .card-bgphoto{display:none}
+}

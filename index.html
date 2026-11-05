@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
 <title>Columbia County Live — Roads, Rivers, Weather &amp; Ferry for Columbia County, Oregon</title>
 <meta name="description" content="One live map for Columbia County, Oregon: US-30 and Lewis & Clark Bridge status, Columbia & Nehalem river levels, weather alerts, earthquakes, wildfires, aircraft and river traffic overhead and under way, the Oscar B ferry, events, and town forecasts. Free, from official public sources.">
 <meta property="og:type" content="website">
@@ -98,6 +97,7 @@ document.documentElement.setAttribute("data-theme",t);})();
         <!-- v4: the theme toggle lives HERE now — top-right, beside the
              clock, labelled and amber-ringed. In v3 it was the first
              pill in the chip row below and Travis had to hunt for it. -->
+        <button class="hero-theme-btn display-btn" id="display-btn" type="button" aria-label="Open display mode — the community screensaver" title="Open display mode — the community screensaver"><svg class="theme-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M12 16.5v3M8.8 21h6.4"/></svg><span data-i18n="displaybtn">Display</span></button>
         <button class="theme-toggle hero-theme-btn" id="theme-btn" type="button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch between light and dark mode"><img class="theme-ico" src="img/icons/icon-theme.png" alt="" aria-hidden="true"><span id="theme-btn-label">Dark</span></button>
       </div>
     </div>
@@ -225,13 +225,13 @@ document.documentElement.setAttribute("data-theme",t);})();
         <p>Columbia County Live is signing exactly three founding sponsors. Their names stay on this panel for good, and their $49/mo rate never rises while they&rsquo;re with us.</p>
         <a class="founding-cta" href="sponsor.html#founding">Become a founding sponsor &rarr;</a>
       </article>
-      <article class="founding-cell house">
+      <article class="founding-cell house" id="founding-cell-watch">
         <p class="cell-eyebrow">Never miss a change</p>
         <h3>Get told when the county changes</h3>
         <p>The County Watch checks the National Weather Service, the bridge and the ferry every two minutes while this page is open — and tells you the moment something new posts.</p>
         <a class="founding-cta alt" href="#watch-card">Start the County Watch &rarr;</a>
       </article>
-      <article class="founding-cell house">
+      <article class="founding-cell house" id="founding-cell-nonprofit">
         <p class="cell-eyebrow">Community notice</p>
         <h3>Free placement for local nonprofits</h3>
         <p>This space rotates free notices for Columbia County nonprofits — food banks, libraries, volunteer fire &amp; EMS recruitment. A community service, not an ad.</p>
@@ -487,7 +487,8 @@ document.documentElement.setAttribute("data-theme",t);})();
       <p class="card-note small" data-i18n="aircraftnote">Aircraft: community ADS-B receivers via adsb.fi. Refreshes automatically.</p>
     </div>
 
-    <div class="card" id="bend-card">
+    <div class="card photo-card" id="bend-card">
+      <div class="card-photo photo-summit"><img src="img/dusk/band-mountain.jpg" alt="Snow on a Cascade peak at dusk" loading="lazy" decoding="async"></div>
       <div class="card-head">
         <h2 data-i18n="bendh2">🏔️ The Bend Run — Pass Conditions</h2>
         <span class="updated" id="bend-updated"></span>
@@ -561,8 +562,8 @@ document.documentElement.setAttribute("data-theme",t);})();
       <p class="card-note small" data-i18n="tidesnote2">Tide <em>predictions</em> from NOAA Tides &amp; Currents (station 9439201 at St. Helens, station 9439099 at Wauna), in feet above mean lower low water. River flow pushes real water off the prediction — a high river runs higher and later — so treat the times as the plan, not a promise.</p>
     </div>
 
-    <div class="card band-card" id="fishpick-card">
-      <div class="card-band" aria-hidden="true"><img src="img/dusk/rivers-night.jpg" alt="" loading="lazy" decoding="async"></div>
+    <div class="card photo-card" id="fishpick-card">
+      <div class="card-photo photo-fish"><img src="img/card-fish.jpg" alt="Small fishing boats along a Columbia River shoreline at golden hour" loading="lazy" decoding="async"><img class="photo-night" src="img/bg/bg-dusk-3.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div>
       <div class="card-head">
         <h2 data-i18n="pickh2">🎣 Fishing — Worth Going?</h2>
       </div>
@@ -701,7 +702,8 @@ document.documentElement.setAttribute("data-theme",t);})();
       <p class="card-note small" data-i18n="eventsnote">Collected by our fetcher from the official city calendars. Official sources: <a href="https://www.sthelensoregon.gov/calendar.aspx" target="_blank" rel="noopener">St. Helens</a> · <a href="https://www.scappoose.gov/calendar.aspx" target="_blank" rel="noopener">Scappoose</a> · <a href="https://www.columbiacountyor.gov/calendar" target="_blank" rel="noopener">Columbia County</a></p>
     </div>
 
-<section class="featured-local" id="featured-local" aria-label="Featured local businesses">
+<section class="featured-local photo-behind" id="featured-local" aria-label="Featured local businesses">
+  <div class="card-bgphoto" aria-hidden="true"><img src="img/featured-vintage.jpg" alt="" loading="lazy" decoding="async"></div>
   <h2 class="featured-title">Local businesses that keep Columbia County Live free</h2>
   <div class="featured-row">
     <article class="featured-card invite">
@@ -725,9 +727,12 @@ document.documentElement.setAttribute("data-theme",t);})();
      rows for the county's one-person services, deliberately plainer
      than the premium glass cards above it. Founding listings are
      free while the directory fills; NO price is shown for this tier
-     until Travis approves the proposed one. Requests ride the same
+     (the $9/mo · $79/yr price was approved by Travis 2026-11-05 —
+     business plan §6 — but the UI stays price-free during the
+     founding launch). Requests ride the same
      sponsor request form (review, then publish — no checkout). -->
-<section class="card services-card" id="services-card" aria-label="Local services directory — small and one-person local services">
+<section class="card services-card photo-card" id="services-card" aria-label="Local services directory — small and one-person local services">
+  <div class="card-photo photo-pier"><img src="img/card-pier.jpg" alt="A boardwalk pier on the lower Columbia River at twilight" loading="lazy" decoding="async"></div>
   <div class="card-head">
     <img class="card-ico" src="img/icons/icon-search.png" alt="" aria-hidden="true"><h2 data-i18n="dirh2">Local services — the little guys</h2>
   </div>
@@ -834,7 +839,8 @@ document.documentElement.setAttribute("data-theme",t);})();
   </div>
 </section>
 
-<section class="card saver-card" id="saver-card" aria-label="The community screensaver — county photos and your pinned answers, made for TVs, tablets and waiting rooms">
+<section class="card saver-card photo-behind" id="saver-card" aria-label="The community screensaver — county photos and your pinned answers, made for TVs, tablets and waiting rooms">
+  <div class="card-bgphoto" aria-hidden="true"><img src="img/bg/bg-dusk-2.jpg" alt="" loading="lazy" decoding="async"></div>
   <div class="card-head">
     <h2 data-i18n="saverh2">📸 The Community Screensaver</h2>
   </div>

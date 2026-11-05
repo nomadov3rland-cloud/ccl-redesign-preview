@@ -16,6 +16,26 @@ document.documentElement.setAttribute("data-theme",t);})();
 </script>
 </head>
 <body class="sponsor-page">
+
+<!-- v2: full-page county photo background (same system as index.html;
+     cycled by the inline script at the end of this page) -->
+<div class="page-bg" aria-hidden="true">
+  <div class="bg-stack bg-day">
+    <div class="bg-layer on" style="background-image:url('img/bg/bg-day-1.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-2.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-3.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-4.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-5.jpg')"></div>
+  </div>
+  <div class="bg-stack bg-dusk">
+    <div class="bg-layer on" style="background-image:url('img/bg/bg-dusk-1.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-2.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-3.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-4.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-5.jpg')"></div>
+  </div>
+</div>
+
 <main class="sp-wrap">
 
   <a class="sp-back" href="index.html">&larr; Back to Columbia County Live</a>
@@ -133,5 +153,15 @@ document.documentElement.setAttribute("data-theme",t);})();
   <p style="margin-top:34px"><a class="sp-back" href="index.html">&larr; Back to Columbia County Live</a></p>
 
 </main>
+<script>
+/* v2: full-page photo background cycler (twin of the app.js block —
+   sponsor.html does not load app.js). Static under reduced motion. */
+(function(){var stacks=document.querySelectorAll('.page-bg .bg-stack');if(!stacks.length)return;
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var max=0;stacks.forEach(function(s){max=Math.max(max,s.children.length);});if(max<2)return;
+var idx=0;setInterval(function(){if(document.hidden)return;idx=(idx+1)%max;
+stacks.forEach(function(s){var layers=s.children,on=idx%layers.length;
+for(var i=0;i<layers.length;i++)layers[i].classList.toggle('on',i===on);});},9000);})();
+</script>
 </body>
 </html>

@@ -6996,3 +6996,26 @@ langSet = function (lang) {
     load('data/events.json').then(function (cal) { render(pick(cal && cal.events)); });
   });
 })();
+
+/* ---------- v2 (2026-11-05): full-page photo background cycler ----------
+   The .page-bg layer stacks (day / dusk) are shown/hidden by the theme in
+   CSS; this only advances which photo is "on" inside each stack, in sync,
+   every 9s. A gentle crossfade (CSS, 2.6s) does the rest. Under
+   prefers-reduced-motion the first photo stays put — no cycling at all. */
+(function () {
+  var stacks = document.querySelectorAll('.page-bg .bg-stack');
+  if (!stacks.length) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var max = 0;
+  stacks.forEach(function (s) { max = Math.max(max, s.children.length); });
+  if (max < 2) return;
+  var idx = 0;
+  setInterval(function () {
+    if (document.hidden) return;
+    idx = (idx + 1) % max;
+    stacks.forEach(function (s) {
+      var layers = s.children, on = idx % layers.length;
+      for (var i = 0; i < layers.length; i++) layers[i].classList.toggle('on', i === on);
+    });
+  }, 9000);
+})();

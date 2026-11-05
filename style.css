@@ -1457,3 +1457,195 @@ html[data-theme="dark"] .leaflet-bar a{background:var(--panel);color:var(--text)
   flex-direction:row;text-align:left;min-height:0;color:#f3efe0;
 }
 .ticker-slide.glance-tile:hover{border-color:transparent}
+
+/* =====================================================================
+   V2 REVISION 2026-11-05 (Travis, after reviewing v1) — supersedes the
+   v1 card treatment above where they conflict:
+   "the images of the county are supposed to pop up and be the entire
+   background and the cards just the etched glass."
+   1) County photos become the ENTIRE page background: a fixed layer
+      behind everything, slowly crossfading (day photos in light mode,
+      the verified dusk pool in dark mode), static under reduced motion.
+   2) Cards stop being solid: every card surface is translucent etched
+      glass floating directly on that photo background. The v1 photo
+      bands are retired (the background IS the photo now).
+   3) Staggered pairs: where a card pairs with content (sponsor page
+      sections, homepage founding cells + featured row), the partners
+      sit side by side with a vertical offset, alternating sides.
+   ===================================================================== */
+
+/* ---------- 1) the full-page photographic background ---------- */
+html{background:#223c29}
+body{background:transparent}
+html[data-theme="dark"] body{background:transparent}
+.sponsor-page{background:transparent}
+.page-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:#223c29}
+.bg-stack{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease}
+html[data-theme="light"] .bg-stack.bg-day{opacity:1}
+html[data-theme="dark"] .bg-stack.bg-dusk{opacity:1}
+.bg-layer{
+  position:absolute;inset:0;background-size:cover;background-position:center 42%;
+  opacity:0;transition:opacity 2.6s ease;transform:scale(1.03);
+}
+.bg-layer.on{opacity:1}
+@media (prefers-reduced-motion:no-preference){
+  .bg-layer.on{animation:bgsettle 12s ease-out both}
+  @keyframes bgsettle{from{transform:scale(1.09)}to{transform:scale(1.03)}}
+}
+@media (prefers-reduced-motion:reduce){
+  .bg-layer{transition:none}
+  .bg-stack{transition:none}
+}
+/* one tasteful veil over the photos: keeps the masthead / ticker zone
+   legible and unifies the set — the photos still read as photos */
+.page-bg::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(22,38,24,.20),rgba(241,236,220,.13) 34%,rgba(241,236,220,.05) 68%,rgba(22,38,24,.16));
+}
+html[data-theme="dark"] .page-bg::after{
+  background:linear-gradient(180deg,rgba(4,9,5,.42),rgba(4,9,5,.30) 40%,rgba(4,9,5,.44));
+}
+
+/* ---------- 2) cards are etched glass on the photo ---------- */
+.card{
+  background:linear-gradient(180deg,rgba(253,250,240,.86),rgba(249,244,229,.76));
+  -webkit-backdrop-filter:blur(12px) saturate(1.25);
+  backdrop-filter:blur(12px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(20,32,16,.10),0 16px 36px rgba(20,32,16,.18);
+}
+html[data-theme="dark"] .card{
+  background:linear-gradient(180deg,rgba(26,43,32,.85),rgba(13,23,16,.77));
+  border-color:rgba(196,226,196,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.4),0 16px 36px rgba(0,0,0,.35);
+}
+/* warm sponsor surfaces get warm glass */
+.featured-local{
+  background:linear-gradient(180deg,rgba(250,238,214,.88),rgba(246,234,208,.78));
+  -webkit-backdrop-filter:blur(12px) saturate(1.2);
+  backdrop-filter:blur(12px) saturate(1.2);
+}
+html[data-theme="dark"] .featured-local{background:linear-gradient(180deg,rgba(43,37,20,.88),rgba(32,27,15,.8))}
+/* nested cards sit ON a glass parent — translucent tint, no second blur
+   (stacked backdrop-filters are what turns glass muddy) */
+.featured-card{background:rgba(253,250,240,.88)}
+html[data-theme="dark"] .featured-card{background:rgba(22,34,26,.88)}
+.featured-event{background:rgba(246,234,208,.85)}
+html[data-theme="dark"] .featured-event{background:rgba(43,37,20,.85)}
+/* finder + footer: glass sheets directly on the photo */
+.finder-box,.finder-results{
+  -webkit-backdrop-filter:blur(12px) saturate(1.25);
+  backdrop-filter:blur(12px) saturate(1.25);
+}
+.finder-box{background:rgba(251,248,238,.82)}
+.finder-results{background:rgba(251,248,238,.9)}
+html[data-theme="dark"] .finder-box{background:rgba(20,33,24,.85)}
+html[data-theme="dark"] .finder-results{background:rgba(20,33,24,.92)}
+.site-footer{
+  background:rgba(247,242,226,.84);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);
+  backdrop-filter:blur(14px) saturate(1.2);
+  border-top:1px solid rgba(255,255,255,.5);
+}
+html[data-theme="dark"] .site-footer{background:rgba(12,21,14,.85);border-top-color:rgba(196,226,196,.14)}
+/* sponsor page surfaces */
+.sp-avail,.sp-terms,.sp-step{
+  background:linear-gradient(180deg,rgba(253,250,240,.86),rgba(249,244,229,.76));
+  -webkit-backdrop-filter:blur(12px) saturate(1.25);
+  backdrop-filter:blur(12px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(20,32,16,.10),0 16px 36px rgba(20,32,16,.18);
+}
+html[data-theme="dark"] .sp-avail,html[data-theme="dark"] .sp-terms,html[data-theme="dark"] .sp-step{
+  background:linear-gradient(180deg,rgba(26,43,32,.85),rgba(13,23,16,.77));
+  border-color:rgba(196,226,196,.18);
+}
+/* the sponsor page's phone mocks show the same photo background inside
+   the frame, so the mini cards float the way the real ones do */
+.sp-phone{background:#20392a url("img/bg/bg-dusk-3.jpg") center/cover no-repeat}
+/* the tab bar joins the glass system (sticky bar stays solid deep green
+   on purpose — the legibility anchor) */
+.tabbar{-webkit-backdrop-filter:blur(14px) saturate(1.25);backdrop-filter:blur(14px) saturate(1.25)}
+/* v1 photo bands retired — the page background carries the photography */
+.card-band{display:none}
+.band-card{padding-top:20px}
+
+/* ---------- 3) staggered side-by-side pairs ---------- */
+/* homepage founding panel: the three cells step down across the panel */
+@media (min-width:761px){
+  #founding-panel .founding-cell:nth-child(2){margin-top:18px}
+  #founding-panel .founding-cell:nth-child(3){margin-top:36px}
+}
+@media (max-width:760px){
+  #founding-panel .founding-cell:nth-child(2){margin-inline-start:14px}
+  #founding-panel .founding-cell:nth-child(3){margin-inline-start:28px}
+}
+/* homepage featured local: the house card sits lower than the invite */
+@media (min-width:641px){
+  .featured-row .featured-card:nth-child(2){margin-top:26px}
+}
+@media (max-width:640px){
+  .featured-row .featured-card:nth-child(2){margin-inline-start:18px}
+}
+/* sponsor page: slot card + terms block, offset, sides alternating
+   (founding = card left / text right; featured = text left / card right,
+   already the DOM order — the stagger is what v2 adds) */
+@media (min-width:761px){
+  #founding .sp-terms{margin-top:54px}
+  #featured .sp-phone{margin-top:54px}
+}
+@media (max-width:760px){
+  #founding .sp-terms{margin-left:12px}
+  #featured .sp-phone{margin-left:12px}
+}
+
+/* ---------- fallbacks: no blur support / reduced transparency ---------- */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .card,.sp-avail,.sp-terms,.sp-step{background:#fbf8ee}
+  .featured-local{background:var(--sponsor-bg)}
+  .site-footer{background:#f7f2e2}
+  .finder-box,.finder-results{background:#fbf8ee}
+  html[data-theme="dark"] .card,html[data-theme="dark"] .sp-avail,
+  html[data-theme="dark"] .sp-terms,html[data-theme="dark"] .sp-step{background:#16211a}
+  html[data-theme="dark"] .site-footer{background:#0c1510}
+  html[data-theme="dark"] .finder-box,html[data-theme="dark"] .finder-results{background:#16211a}
+}
+@media (prefers-reduced-transparency:reduce){
+  .card,.featured-local,.sp-avail,.sp-terms,.sp-step,.site-footer,.finder-box,.finder-results{
+    backdrop-filter:none;-webkit-backdrop-filter:none;background:#fbf8ee;
+  }
+  html[data-theme="dark"] .card,html[data-theme="dark"] .featured-local,
+  html[data-theme="dark"] .sp-avail,html[data-theme="dark"] .sp-terms,
+  html[data-theme="dark"] .sp-step,html[data-theme="dark"] .site-footer,
+  html[data-theme="dark"] .finder-box,html[data-theme="dark"] .finder-results{background:#16211a}
+}
+@media print{
+  .page-bg{display:none!important}
+  .card,.sp-avail,.sp-terms,.sp-step,.site-footer{background:#fff!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+
+/* v2 readability touch-up (screenshot review): the few text lines that sit
+   directly on the photo — finder hint, sponsor hero/notes/back link — get
+   a soft halo in the page's own bone (light) / deep green (dark) so they
+   hold over bright sky and busy foliage alike */
+.finder-hint,.sp-hero p,.sp-note,.sp-back{
+  text-shadow:0 1px 6px rgba(247,242,226,.95),0 0 2px rgba(247,242,226,.9);
+}
+html[data-theme="dark"] .finder-hint,html[data-theme="dark"] .sp-hero p,
+html[data-theme="dark"] .sp-note,html[data-theme="dark"] .sp-back{
+  text-shadow:0 1px 6px rgba(6,12,7,.95),0 0 2px rgba(6,12,7,.9);
+}
+
+/* v2 touch-up 2: the finder hint gets its own whisper of glass (a pill in
+   the site's chip language) — a text halo alone didn't hold over the
+   brightest bridge steel in screenshot review */
+.finder-hint{
+  background:rgba(247,242,226,.68);border:1px solid rgba(255,255,255,.45);
+  border-radius:12px;padding:7px 12px;
+  -webkit-backdrop-filter:blur(8px) saturate(1.2);
+  backdrop-filter:blur(8px) saturate(1.2);
+  text-shadow:none;
+}
+html[data-theme="dark"] .finder-hint{
+  background:rgba(16,28,19,.68);border-color:rgba(196,226,196,.14);text-shadow:none;
+}

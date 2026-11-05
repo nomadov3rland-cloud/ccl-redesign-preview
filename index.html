@@ -34,6 +34,26 @@ document.documentElement.setAttribute("data-theme",t);})();
 </head>
 <body>
 
+<!-- v2: full-page county photo background (fixed layer; day set in light
+     mode, verified dusk pool in dark mode; cycled by app.js, static under
+     prefers-reduced-motion) -->
+<div class="page-bg" aria-hidden="true">
+  <div class="bg-stack bg-day">
+    <div class="bg-layer on" style="background-image:url('img/bg/bg-day-1.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-2.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-3.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-4.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-day-5.jpg')"></div>
+  </div>
+  <div class="bg-stack bg-dusk">
+    <div class="bg-layer on" style="background-image:url('img/bg/bg-dusk-1.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-2.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-3.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-4.jpg')"></div>
+    <div class="bg-layer" style="background-image:url('img/bg/bg-dusk-5.jpg')"></div>
+  </div>
+</div>
+
 <header class="hero">
   <img class="hero-img" src="img/hero-bridge.jpg" alt="The Lewis and Clark Bridge spanning the Columbia River at Rainier, with snow-capped Mount St. Helens in the distance" fetchpriority="high">
   <img class="hero-img hero-img-night" src="img/dusk/hero-night.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">

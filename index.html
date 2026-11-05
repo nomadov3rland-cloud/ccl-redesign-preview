@@ -746,6 +746,7 @@ document.documentElement.setAttribute("data-theme",t);})();
     <button class="share-btn primary" id="share-btn" type="button" data-i18n="sharebtn">📤 Share this page</button>
     <button class="share-btn" id="install-btn" type="button" data-i18n="installbtn">📱 Add to home screen</button>
     <button class="share-btn" id="wall-btn" type="button" data-i18n="wallbtn">📺 Wall display</button>
+    <button class="share-btn" id="saver-btn" type="button" data-i18n="saverbtn">🖥️ Screensaver</button>
     <button class="share-btn" id="print-btn" type="button">🖨️ Print the county sheet</button>
   </div>
   <p class="print-note">🖨️ The county sheet is one printed page with today&rsquo;s answers — made for the fridge door, the library bulletin board, and the shop counter. Posting it where neighbors pass by is this site&rsquo;s favorite kind of advertising.</p>
@@ -756,6 +757,42 @@ document.documentElement.setAttribute("data-theme",t);})();
 
 
 
+
+<section class="card saver-card" id="saver-card" aria-label="The community screensaver — county photos and your pinned answers, made for TVs, tablets and waiting rooms">
+  <div class="card-head">
+    <h2 data-i18n="saverh2">📸 The Community Screensaver</h2>
+  </div>
+  <p class="card-note" data-i18n="saverp1">The wall display rotates the county&rsquo;s answers. The screensaver is the quieter room: county photographs, changing slowly, with the clock and just the answers you pin — made to be left running on a kitchen tablet, a shop counter, or the TV in a waiting room. It refreshes itself from the same live sources as this page, never asks for anything, and leaves with one tap.</p>
+  <div class="saver-actions">
+    <button class="share-btn primary" id="saver-start-btn" type="button" data-i18n="saverstart">🖥️ Start the screensaver</button>
+    <p class="saver-tip" data-i18n="savertip">Putting it on a TV or an office screen? Open this page with <strong>?display=1</strong> added to the end of the address and the screensaver starts by itself — bookmark that address on the TV&rsquo;s browser and it just comes up.</p>
+  </div>
+  <h3 class="subhead" data-i18n="saverpinsh">Your answers on the screen</h3>
+  <p class="card-note" data-i18n="saverpinsp">Pin the answers you care about — here, or with the small 📌 on each answer in the scrolling strip up top. The screensaver shows your pins, big enough to read across the room. Pins are kept on this device only, and you can change them any time.</p>
+  <div class="saver-pins" id="saver-pins" role="group" aria-label="Choose which answers the screensaver shows"></div>
+  <h3 class="subhead" data-i18n="savershareh">Share your county photo</h3>
+  <p class="card-note" data-i18n="saversharep">The photographs in the screensaver come from the county itself — and yours could be one of them. Send a photo you took anywhere in Columbia County and, once it&rsquo;s approved, it joins the pool every screensaver cycles through, with your name on it. Free, always.</p>
+  <!-- PROTOTYPE PLACEHOLDER: the submit link below points at PHOTO_FORM_URL
+       (constant in app.js). Live step: create the real Google Form — name /
+       where taken / photo upload / rights checkbox, mirroring the sponsor
+       form — and swap the constant. Nothing submitted anywhere is ever
+       published automatically: see the review gate in DESIGN-SPEC.md. -->
+  <form class="photo-form" id="photo-form">
+    <label class="photo-field"><span data-i18n="savername">Your name — shown as the photo credit</span>
+      <input id="photo-name" type="text" autocomplete="name" placeholder="e.g. Sam Rivera">
+    </label>
+    <label class="photo-field"><span data-i18n="saverwhere">Where in the county was it taken?</span>
+      <input id="photo-where" type="text" placeholder="e.g. Jones Beach, near Clatskanie">
+    </label>
+    <label class="photo-field"><span data-i18n="saverfile">Your photo</span>
+      <input id="photo-file" type="file" accept="image/*">
+    </label>
+    <label class="photo-rights"><input id="photo-rights" type="checkbox"> <span data-i18n="saverrights">I took this photo and I give Columbia County Live permission to show it.</span></label>
+    <a class="share-btn primary photo-submit is-off" id="photo-submit" href="https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM" target="_blank" rel="noopener" aria-disabled="true" data-i18n="saversubmit">Continue to the photo form &rarr;</a>
+    <p class="card-note small" data-i18n="saversubmitnote">The button wakes up once you&rsquo;ve filled in the three lines and ticked the permission box. The form itself asks for the same name and place, and takes the upload.</p>
+  </form>
+  <p class="card-note small" data-i18n="saverreview">One honest gate: every photo is looked at by a person before it joins the pool — for the place, the picture, and the permission. Nothing appears automatically, and a photo that isn&rsquo;t yours to share never goes up.</p>
+</section>
 
 <section class="card about-card" id="about-card" aria-label="About Columbia County Live — what it is, why it is free, and supporting it">
   <div class="card-head">
@@ -794,6 +831,33 @@ document.documentElement.setAttribute("data-theme",t);})();
     <span class="wall-dots" id="wall-dots" aria-hidden="true"></span>
     <span class="wall-src" id="wall-src"></span>
   </div>
+</div>
+
+<!-- Community Screensaver (Redesign prototype 2026-11-05): the ambient
+     display. One county photo fills the screen and crossfades slowly
+     through the community pool (data/community-photos.json); the clock
+     and the visitor's pinned answers sit over it in across-the-room
+     type. It runs unattended — the page's own data timers keep the
+     answers fresh behind it, and it never opens a dialog, a prompt or
+     a permission request. Any tap, click or keypress leaves. Open it
+     from the Screensaver buttons, or bookmark ?display=1 on a TV. -->
+<div class="saver-overlay" id="saver-overlay" hidden role="dialog" aria-modal="true" aria-label="Community screensaver — county photos with the live answers you pinned">
+  <div class="saver-photo saver-photo-a is-on" id="saver-photo-a" aria-hidden="true"></div>
+  <div class="saver-photo saver-photo-b" id="saver-photo-b" aria-hidden="true"></div>
+  <div class="saver-scrim" aria-hidden="true"></div>
+  <div class="saver-top">
+    <span class="saver-brand"><img src="img/icons/icon-logo-pine.png" alt="" aria-hidden="true"> Columbia County <span class="live-word">Live</span></span>
+    <span class="saver-live"><span class="pulse-dot" aria-hidden="true"></span> LIVE</span>
+  </div>
+  <div class="saver-clockbox">
+    <div class="saver-clock" id="saver-clock">—</div>
+    <div class="saver-date" id="saver-date">—</div>
+  </div>
+  <div class="saver-answers" id="saver-answers" aria-live="off"></div>
+  <div class="saver-quiet" id="saver-quiet"></div>
+  <div class="saver-credit" id="saver-credit"></div>
+  <div class="saver-exit-hint" id="saver-exit-hint">Tap anywhere to exit</div>
+  <button class="saver-exit" id="saver-exit" type="button" aria-label="Exit screensaver">✕</button>
 </div>
 
 <section id="print-sheet" aria-label="The county sheet — a one-page printable summary of today's county answers">

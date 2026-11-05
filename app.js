@@ -5701,6 +5701,22 @@ const LANG_ES = {
   sharebtn: '📤 Compartir esta página',
   installbtn: '📱 Agregar a pantalla de inicio',
   wallbtn: '📺 Pantalla en pared',
+  saverbtn: '🖥️ Protector de pantalla',
+  saverh2: '📸 El protector de pantalla de la comunidad',
+  saverp1: 'La pantalla en pared rota las respuestas del condado. El protector de pantalla es el cuarto más tranquilo: fotografías del condado, cambiando despacio, con el reloj y solo las respuestas que tú fijas — hecho para quedarse encendido en una tableta de cocina, un mostrador o el televisor de una sala de espera. Se actualiza solo desde las mismas fuentes en vivo que esta página, nunca pide nada, y se va con un solo toque.',
+  saverstart: '🖥️ Iniciar el protector de pantalla',
+  savertip: '¿Lo vas a poner en un televisor o en una pantalla de oficina? Abre esta página con <strong>?display=1</strong> al final de la dirección y el protector de pantalla inicia solo — guarda esa dirección en el navegador del televisor y aparecerá sin más.',
+  saverpinsh: 'Tus respuestas en la pantalla',
+  saverspinsp: 'Fija las respuestas que te importan — aquí, o con el 📌 pequeño en cada respuesta de la banda que pasa arriba. El protector de pantalla muestra tus fijadas, lo bastante grandes para leerse desde el otro lado del cuarto. Las fijadas se guardan solo en este aparato, y puedes cambiarlas cuando quieras.',
+  savershareh: 'Comparte tu foto del condado',
+  saversharep: 'Las fotografías del protector de pantalla vienen del propio condado — y la tuya podría ser una de ellas. Envía una foto que hayas tomado en cualquier lugar del condado de Columbia y, una vez aprobada, se une al conjunto por el que pasan todos los protectores de pantalla, con tu nombre. Gratis, siempre.',
+  savername: 'Tu nombre — aparecerá como el crédito de la foto',
+  saverwhere: '¿En qué lugar del condado fue tomada?',
+  saverfile: 'Tu foto',
+  saverrights: 'Yo tomé esta foto y doy permiso a Columbia County Live para mostrarla.',
+  saversubmit: 'Continuar al formulario de fotos &rarr;',
+  saversubmitnote: 'El botón se activa cuando llenas las tres líneas y marcas la casilla de permiso. El formulario pide el mismo nombre y lugar, y recibe la foto.',
+  saverreview: 'Una puerta honesta: cada foto la mira una persona antes de unirse al conjunto — el lugar, la imagen y el permiso. Nada aparece automáticamente, y una foto que no es tuya para compartir nunca se publica.',
   footerbyline: '<strong>Columbia County Live</strong> — por <strong>Nomad Development Group</strong>',
   footerdata: 'Datos: Servicio Meteorológico Nacional · Servicio Geológico de EE. UU. (USGS) · NOAA Tides &amp; Currents (mareas del río) · NOAA nowCOAST (radar) · NIFC WFIGS (incendios forestales) · colaboradores de adsb.fi (aviones, ODbL) · wheretheiss.at (posición de la EEI) · CelesTrak / NORAD (órbita de la EEI, para predicciones de paso) · Open-Meteo / Copernicus CAMS (modelo de calidad del aire) · Fish Passage Center y Columbia Basin Research DART (conteos de peces en las presas — datos del Cuerpo de Ingenieros del Ejército de EE. UU.) · colaboradores de OpenStreetMap. Los datos de captura (carreteras, cámaras, puente, alertas del ferry, eventos, tráfico del río) los recoge un pequeño programa recolector de los operadores oficiales — ODOT TripCheck, WSDOT, el condado de Wahkiakum y los calendarios de las ciudades y el condado — y se etiquetan con la hora en que se recogieron. El modelo de capas de rastreo en vivo está inspirado en God&rsquo;s Eye View (código abierto, de Bilawal Sidhu), cuyo DATA_SOURCES.md nos señaló varias de estas fuentes públicas.',
   footerdisc: 'Esta página reúne datos públicos por conveniencia. Antes de viajar con clima severo o agua alta, confirma las condiciones con las fuentes oficiales enlazadas arriba.',
@@ -7159,4 +7175,423 @@ langSet = function (lang) {
     var mo = new MutationObserver(apply);
     views.forEach(function (v) { mo.observe(v, { attributes: true, attributeFilter: ['hidden', 'class'] }); });
   }
+})();
+
+/* ---------- Community Screensaver (Redesign prototype, 2026-11-05) ----------
+   Travis's direction: an ambient display people can leave running — a
+   phone, a kitchen tablet, or a TV in a county office or waiting room.
+   County photographs fill the screen and crossfade SLOWLY through the
+   community pool (this mode is the one place photo cycling belongs;
+   the main site's backgrounds stay calm, per v3/v4). Over the photo:
+   a large clock + date, and the live answers the visitor PINNED, in
+   across-the-room type over a directional scrim.
+
+   Unattended by design: the overlay lives in this same page, so every
+   data timer the page already runs keeps the answers fresh behind it;
+   the mode itself never opens a dialog, never asks a permission,
+   never pops anything. Exit is any tap / click / keypress.
+
+   Pins: the four glance answers (bridge / tides / weather / next
+   event) carry a small 📌 toggle on the strip itself, the ferry joins
+   them from the intro card, and every answer also has a pin chip in
+   the Community Screensaver card on Events & More. Pins live in the
+   GENERIC pin store (window.CCLPins, localStorage ccl-pins-v1) —
+   one stored object, { cards: [...], answers: [...] } — because
+   pins are a site-wide concept, not a screensaver one: Travis has
+   directed that pinned CARDS will also render at the top of the
+   Today view (the base site's front-page system already moves
+   pinned cards there; the next pass unifies its toggles onto this
+   store and reads store.cards). This module owns the answers half;
+   with no stored choice the answers default to the four glance
+   answers. Card heads deliberately carry NO saver pins: they
+   already hold the front-page pin system, and two pin systems on
+   one card head would collide.
+
+   Photo pool: data/community-photos.json — { src, credit, location }
+   per entry, each shown with its credit line. Seeded with verified
+   site photographs marked "starter". COMMUNITY SUBMISSIONS NEVER
+   WRITE TO THAT FILE: they go to the photo form (PHOTO_FORM_URL
+   below — a PLACEHOLDER until the live step creates the real Google
+   Form, mirroring how SPONSOR_FORM_URL was swapped in at v20), land
+   in the form inbox, pass a human review, and only then get added to
+   the JSON by hand. The review gate is the feature's load-bearing
+   wall, not a detail. */
+const PHOTO_FORM_URL = 'https://forms.gle/COLUMBIA-COUNTY-PHOTO-FORM'; // PLACEHOLDER — live step: create the real photo Google Form and swap this constant
+(function initSaver() {
+  var overlay = document.getElementById('saver-overlay');
+  if (!overlay) return;
+  var PHOTO_MS = 16000;      // dwell per photo — a slow ambient cycle
+  var QUIET = [
+    { en: 'Presented by — your business here · Founding Sponsor · $49/mo · 0 of 3 claimed',
+      es: 'Presentado por — su negocio aquí · Patrocinador Fundador · $49/mes · 0 de 3 reclamados' },
+    { en: 'These photographs come from the county itself — share yours from the Events & More tab',
+      es: 'Estas fotografías vienen del propio condado — comparte la tuya desde la pestaña Eventos y Más' },
+    null /* a beat of nothing — the quiet line rests every third photo */
+  ];
+  var FALLBACK_POOL = [
+    { src: 'img/bg/bg-day-1.jpg',  credit: 'Gary Halvorson, Oregon State Archives', location: 'Lewis & Clark Bridge — Rainier' },
+    { src: 'img/bg/bg-day-6.jpg',  credit: 'Kingofthedead', location: 'The dock at Rainier, on the Columbia' },
+    { src: 'img/bg/bg-day-4.jpg',  credit: 'SounderBruce', location: 'The Oscar B ferry, leaving Puget Island' },
+    { src: 'img/bg/bg-day-3.jpg',  credit: 'Quintin Soloviev', location: 'River traffic passing under the Lewis & Clark Bridge' },
+    { src: 'img/bg/bg-dusk-2.jpg', credit: 'Joe Mabel', location: 'Mouth of the Columbia, from Astoria Column' },
+    { src: 'img/bg/bg-dusk-3.jpg', credit: 'Rennett Stowe', location: 'Fishing boat at sunset, lower Columbia' },
+    { src: 'img/bg/bg-dusk-4.jpg', credit: 'Marshalllee84', location: 'Mt. St. Helens at sunset' },
+    { src: 'img/bg/bg-dusk-5.jpg', credit: 'USFWS Pacific', location: 'Sunset on the Columbia at Kelley Point' }
+  ];
+
+  /* ----- the answers the screensaver can show ----- */
+  function tileOf(valId) {
+    var v = document.getElementById(valId);
+    return v ? v.closest('.glance-tile') : null;
+  }
+  function tileLabel(valId, fallback) {
+    var t = tileOf(valId);
+    var l = t ? t.querySelector('.glance-label') : null;
+    var s = l ? l.textContent.trim() : '';
+    return s || fallback[langCur === 'es' ? 'es' : 'en'];
+  }
+  function tileSub(valId) {
+    var t = tileOf(valId);
+    var s = t ? t.querySelector('.glance-sub') : null;
+    return s ? s.textContent.trim() : '';
+  }
+  function cleanVal(id) {
+    var el = document.getElementById(id);
+    var v = el ? el.textContent.trim() : '';
+    if (!v || /checking|loading|gathering|cargando|buscando/i.test(v)) return '';
+    return v;
+  }
+  var ANSWERS = [
+    { id: 'bridge', icon: 'img/icons/icon-bridge.png',
+      label: function () { return tileLabel('glance-bridge-val', { en: 'Bridge', es: 'Puente' }); },
+      val: function () { return cleanVal('glance-bridge-val'); },
+      sub: function () { return tileSub('glance-bridge-val'); } },
+    { id: 'tides', icon: 'img/icons/icon-river.png',
+      label: function () { return tileLabel('glance-river-val', { en: 'Columbia River — Tides', es: 'Río Columbia — Mareas' }); },
+      val: function () { return cleanVal('glance-river-val'); },
+      sub: function () { return tileSub('glance-river-val'); } },
+    { id: 'weather', icon: 'img/icons/icon-alert.png',
+      label: function () { return tileLabel('glance-alerts-val', { en: 'Weather alerts', es: 'Alertas del tiempo' }); },
+      val: function () { return cleanVal('glance-alerts-val'); },
+      sub: function () { return tileSub('glance-alerts-val'); } },
+    { id: 'events', icon: 'img/icons/icon-event-pin.png',
+      label: function () { return tileLabel('glance-events-val', { en: 'Next event', es: 'Próximo evento' }); },
+      val: function () { return cleanVal('glance-events-val'); },
+      sub: function () { return tileSub('glance-events-val'); } },
+    { id: 'ferry', icon: 'img/icons/icon-ferry.png',
+      label: function () { return langCur === 'es' ? 'Próximo ferry' : 'Next ferry'; },
+      val: function () {
+        var fn = document.getElementById('ferry-next');
+        var h = fn ? fn.querySelector('.ferry-next-head') : null;
+        var v = h ? h.textContent.trim() : '';
+        if (!v || /loading|working out|cargando/i.test(v)) return '';
+        return v;
+      },
+      sub: function () { return 'Westport, OR ↔ Puget Island, WA'; } }
+  ];
+  var ANSWER_IDS = ANSWERS.map(function (a) { return a.id; });
+
+  /* ----- pins: the GENERIC pin store -----
+     One stored object for every kind of pin on the site:
+       { cards:   [card ids, in pin order],
+         answers: [saver answer ids, in pin order] }
+     persisted at localStorage 'ccl-pins-v1' and exposed as
+     window.CCLPins so any renderer — this saver today, the
+     pinned-cards-at-the-top-of-Today renderer next — reads and
+     writes the same list. Changes broadcast a 'ccl-pins-changed'
+     document event. Migration, one-way and read-only toward the
+     older keys: a first load with no generic store seeds answers
+     from the saver's prototype key (ccl-saver-pins-v1) if present,
+     and seeds cards from the front-page system's store
+     (ccl-frontpage-v1) so its existing pins are already here when
+     its toggles unify onto this store. */
+  var PINS_KEY = 'ccl-pins-v1';
+  var pinStore = { cards: [], answers: null };
+  function pinStoreSave() {
+    try { window.localStorage.setItem(PINS_KEY, JSON.stringify(pinStore)); } catch (e) { /* session-only */ }
+    try { document.dispatchEvent(new CustomEvent('ccl-pins-changed', { detail: { cards: pinStore.cards.slice(), answers: (pinStore.answers || []).slice() } })); } catch (e) { /* older browser — renderers poll instead */ }
+  }
+  (function pinStoreLoad() {
+    var v = null;
+    try { v = JSON.parse(window.localStorage.getItem(PINS_KEY) || 'null'); } catch (e) { /* unreadable */ }
+    if (v && typeof v === 'object') {
+      if (Array.isArray(v.cards)) pinStore.cards = v.cards.filter(function (x) { return typeof x === 'string'; });
+      if (Array.isArray(v.answers)) pinStore.answers = v.answers.filter(function (id) { return ANSWER_IDS.indexOf(id) !== -1; });
+    }
+    if (!pinStore.answers) {
+      var legacy = null;
+      try { legacy = JSON.parse(window.localStorage.getItem('ccl-saver-pins-v1') || 'null'); } catch (e) { /* none */ }
+      pinStore.answers = Array.isArray(legacy)
+        ? legacy.filter(function (id) { return ANSWER_IDS.indexOf(id) !== -1; })
+        : ['bridge', 'tides', 'weather', 'events'];
+    }
+    if (!pinStore.cards.length) {
+      var fp = null;
+      try { fp = JSON.parse(window.localStorage.getItem('ccl-frontpage-v1') || 'null'); } catch (e) { /* none */ }
+      if (Array.isArray(fp)) pinStore.cards = fp.filter(function (x) { return typeof x === 'string'; });
+    }
+  })();
+  var pins = pinStore.answers;   // the saver's live view of the answers half
+  function savePins() { pinStore.answers = pins; pinStoreSave(); }
+  window.CCLPins = {
+    key: PINS_KEY,
+    all: function () { return { cards: pinStore.cards.slice(), answers: pinStore.answers.slice() }; },
+    has: function (kind, id) { var l = kind === 'cards' ? pinStore.cards : pinStore.answers; return l.indexOf(id) !== -1; },
+    toggle: function (kind, id) {
+      var l = kind === 'cards' ? pinStore.cards : pinStore.answers;
+      var i = l.indexOf(id);
+      if (i !== -1) l.splice(i, 1); else l.push(id);
+      if (kind === 'answers') { pins = pinStore.answers; paintPins(); if (saverOpen) renderSaverAnswers(); }
+      pinStoreSave();
+      return l.slice();
+    }
+  };
+  function isPinned(id) { return pins.indexOf(id) !== -1; }
+  function togglePin(id) {
+    if (isPinned(id)) pins = pins.filter(function (x) { return x !== id; });
+    else pins.push(id);
+    savePins();
+    paintPins();
+    if (saverOpen) renderSaverAnswers();
+  }
+
+  /* pin chips in the screensaver card */
+  function paintPins() {
+    var wrap = document.getElementById('saver-pins');
+    if (wrap) {
+      wrap.innerHTML = ANSWERS.map(function (a) {
+        var on = isPinned(a.id);
+        return '<button type="button" class="saver-chip' + (on ? ' on' : '')
+          + '" data-saver-chip="' + a.id + '" aria-pressed="' + (on ? 'true' : 'false') + '">'
+          + '<img src="' + a.icon + '" alt="" aria-hidden="true">'
+          + '<span>' + esc(a.label()) + '</span>'
+          + '<span class="saver-chip-state">' + (on
+            ? (langCur === 'es' ? '📌 Fijada' : '📌 Pinned')
+            : (langCur === 'es' ? 'Fijar' : 'Pin')) + '</span></button>';
+      }).join('');
+    }
+    document.querySelectorAll('.saver-pin').forEach(function (b) {
+      var on = isPinned(b.getAttribute('data-saver-pin'));
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  var chipsWrap = document.getElementById('saver-pins');
+  if (chipsWrap) chipsWrap.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-saver-chip]');
+    if (b) togglePin(b.getAttribute('data-saver-chip'));
+  });
+
+  /* pin toggles on the glance strip items themselves. The buttons ride
+     INSIDE the canonical tiles; the strip's clone sync copies tile
+     innerHTML into the marquee clones, so the CSS layer hides any
+     .saver-pin inside a .strip-clone (display:none — untabbable,
+     unclickable, unseen). Capture-phase click keeps a pin tap from
+     ever following the tile's link. */
+  var VAL_TO_ANSWER = { 'glance-bridge-val': 'bridge', 'glance-river-val': 'tides',
+    'glance-alerts-val': 'weather', 'glance-events-val': 'events' };
+  document.querySelectorAll('#strip-track > .glance-tile:not(.strip-clone)').forEach(function (tile) {
+    var val = tile.querySelector('.glance-val');
+    var aid = val ? VAL_TO_ANSWER[val.id] : null;
+    if (!aid) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'saver-pin';
+    b.setAttribute('data-saver-pin', aid);
+    b.textContent = '📌';
+    tile.appendChild(b);
+    b.addEventListener('click', function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      togglePin(aid);
+    }, true);
+  });
+
+  /* ----- the photo pool ----- */
+  var pool = FALLBACK_POOL, poolIdx = 0, frontIsA = true, fadeToken = 0;
+  function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function setCaption(p) {
+    var credit = document.getElementById('saver-credit');
+    if (credit) credit.innerHTML = p.credit
+      ? '<span class="saver-credit-name">' + escHtml(p.credit) + '</span>' +
+        (p.location ? '<span class="saver-credit-loc">' + escHtml(p.location) + '</span>' : '')
+      : '';
+    var q = QUIET[poolIdx % QUIET.length];
+    var qEl = document.getElementById('saver-quiet');
+    if (qEl) qEl.textContent = q ? q[langCur === 'es' ? 'es' : 'en'] : '';
+  }
+  function showPhoto(idx, instant) {
+    if (!pool.length) return;
+    poolIdx = ((idx % pool.length) + pool.length) % pool.length;
+    var p = pool[poolIdx];
+    var front = document.getElementById(frontIsA ? 'saver-photo-a' : 'saver-photo-b');
+    var back = document.getElementById(frontIsA ? 'saver-photo-b' : 'saver-photo-a');
+    fadeToken++;
+    if (instant || !back) {
+      if (front) { front.style.backgroundImage = 'url("' + p.src + '")'; front.classList.add('is-on'); }
+      setCaption(p);
+    } else {
+      back.style.backgroundImage = 'url("' + p.src + '")';
+      back.classList.add('is-on');
+      front.classList.remove('is-on');
+      frontIsA = !frontIsA;
+      /* the credit names the photo you can SEE — it swaps when the
+         fade lands, not when it starts */
+      var tk = fadeToken;
+      setTimeout(function () { if (tk === fadeToken && saverOpen) setCaption(p); }, 2900);
+    }
+    var next = new Image();
+    next.src = pool[(poolIdx + 1) % pool.length].src;
+  }
+  fetch('data/community-photos.json').then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (d && Array.isArray(d.photos) && d.photos.length) {
+        pool = d.photos.filter(function (p) { return p && p.src; });
+        if (saverOpen) showPhoto(poolIdx, true);
+      }
+    }).catch(function () { /* the fallback pool carries the mode */ });
+
+  /* ----- rendering ----- */
+  function renderSaverClock() {
+    var c = document.getElementById('saver-clock');
+    var d = document.getElementById('saver-date');
+    var now = new Date();
+    var loc = langCur === 'es' ? 'es-US' : 'en-US';
+    if (c) c.textContent = new Intl.DateTimeFormat(loc, {
+      timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit' }).format(now);
+    if (d) d.textContent = new Intl.DateTimeFormat(loc, {
+      timeZone: 'America/Los_Angeles', weekday: 'long', month: 'long', day: 'numeric' }).format(now);
+  }
+  function renderSaverAnswers() {
+    var wrap = document.getElementById('saver-answers');
+    if (!wrap) return;
+    var shown = ANSWERS.filter(function (a) { return isPinned(a.id); });
+    if (!shown.length) {
+      wrap.innerHTML = '<div class="saver-answer saver-answer-none"><div class="saver-answer-val">'
+        + (langCur === 'es' ? 'Sin respuestas fijadas' : 'No answers pinned') + '</div>'
+        + '<div class="saver-answer-sub">'
+        + (langCur === 'es' ? 'Fija las tuyas desde la pestaña Eventos y Más' : 'Pin yours from the Events &amp; More tab') + '</div></div>';
+      return;
+    }
+    wrap.innerHTML = shown.map(function (a) {
+      var v = a.val();
+      return '<div class="saver-answer">'
+        + '<div class="saver-answer-label"><img src="' + a.icon + '" alt="" aria-hidden="true"> ' + esc(a.label()) + '</div>'
+        + '<div class="saver-answer-val">' + esc(v || '—') + '</div>'
+        + (a.sub() ? '<div class="saver-answer-sub">' + esc(a.sub()) + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  /* ----- open / close: unattended, gestureless-tolerant ----- */
+  var saverOpen = false, saverTimer = null, saverWake = null;
+  var shownAt = 0, tickCount = 0;
+  function saverTick() {
+    if (!saverOpen) return;
+    renderSaverClock();
+    tickCount++;
+    if (typeof document !== 'undefined' && document.hidden) { shownAt = Date.now(); return; }
+    if (tickCount % 5 === 0) renderSaverAnswers();          // answers re-read every 5s
+    if (Date.now() - shownAt >= PHOTO_MS) { shownAt = Date.now(); showPhoto(poolIdx + 1, false); }
+  }
+  function openSaver() {
+    if (saverOpen) return;
+    saverOpen = true;
+    overlay.hidden = false;
+    document.body.classList.add('saver-on');
+    shownAt = Date.now(); tickCount = 0;
+    renderSaverClock();
+    renderSaverAnswers();
+    showPhoto(poolIdx, true);
+    saverTimer = setInterval(saverTick, 1000);
+    var hint = document.getElementById('saver-exit-hint');
+    if (hint) {
+      hint.classList.remove('dim');
+      setTimeout(function () { if (saverOpen) hint.classList.add('dim'); }, 5000);
+    }
+    try {
+      var de = document.documentElement;
+      if (de && de.requestFullscreen) { var pr = de.requestFullscreen(); if (pr && pr.catch) pr.catch(function () {}); }
+    } catch (e) { /* fullscreen is a nicety, never a requirement — and without a gesture (a ?display=1 TV bookmark) the browser may simply decline */ }
+    try {
+      if (navigator.wakeLock && navigator.wakeLock.request) {
+        navigator.wakeLock.request('screen').then(function (w) {
+          if (saverOpen) saverWake = w;
+          else if (w && w.release) w.release();
+        }).catch(function () {});
+      }
+    } catch (e) { /* the saver runs fine without a wake lock */ }
+  }
+  function closeSaver() {
+    if (!saverOpen) return;
+    saverOpen = false;
+    if (saverTimer) { clearInterval(saverTimer); saverTimer = null; }
+    overlay.hidden = true;
+    document.body.classList.remove('saver-on');
+    try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
+    try { if (saverWake && saverWake.release) saverWake.release(); } catch (e) {}
+    saverWake = null;
+  }
+  ['saver-btn', 'saver-start-btn'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener('click', openSaver);
+  });
+  var exitBtn = document.getElementById('saver-exit');
+  if (exitBtn) exitBtn.addEventListener('click', function (ev) {
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    closeSaver();
+  });
+  overlay.addEventListener('click', function () { if (saverOpen) closeSaver(); });
+  document.addEventListener('keydown', function (ev) {
+    if (!saverOpen) return;
+    var t = ev.target;
+    if (t && /INPUT|TEXTAREA|SELECT/.test(t.tagName || '')) return;
+    closeSaver();
+  });
+
+  /* ----- the photo form's honest gate: the continue button wakes only
+     when the name, the place and the permission box are all present.
+     The fields mirror the real form's questions; the submission
+     itself happens on the form (PHOTO_FORM_URL) and nothing sent
+     there is ever published without review. ----- */
+  var form = document.getElementById('photo-form');
+  if (form) {
+    var nameEl = document.getElementById('photo-name'),
+        whereEl = document.getElementById('photo-where'),
+        rightsEl = document.getElementById('photo-rights'),
+        submitEl = document.getElementById('photo-submit');
+    var gate = function () {
+      var ok = !!(nameEl && nameEl.value.trim() && whereEl && whereEl.value.trim()
+        && rightsEl && rightsEl.checked);
+      if (submitEl) {
+        submitEl.classList.toggle('is-off', !ok);
+        submitEl.setAttribute('aria-disabled', ok ? 'false' : 'true');
+        if (ok) submitEl.setAttribute('href', PHOTO_FORM_URL);
+      }
+      return ok;
+    };
+    form.addEventListener('input', gate);
+    form.addEventListener('change', gate);
+    if (submitEl) submitEl.addEventListener('click', function (ev) {
+      if (!gate()) ev.preventDefault();
+    });
+    gate();
+  }
+
+  paintPins();
+
+  /* language flips re-render the saver's own chrome (same wrap pattern
+     as the schools board and the tide glance) */
+  var langSetSaverPrev = langSet;
+  langSet = function (lang) {
+    langSetSaverPrev(lang);
+    paintPins();
+    if (saverOpen) { renderSaverClock(); renderSaverAnswers(); showPhoto(poolIdx, true); }
+  };
+
+  /* a TV / office screen can bookmark straight into the mode */
+  try {
+    if (new URLSearchParams(window.location.search).get('display') === '1') {
+      setTimeout(openSaver, 350);
+    }
+  } catch (e) { /* no query string — the buttons still work */ }
 })();

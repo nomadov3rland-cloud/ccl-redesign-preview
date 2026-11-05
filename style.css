@@ -1916,3 +1916,89 @@ html[data-theme="dark"] .rail-cta{color:#cfe0b8;border-color:rgba(196,226,196,.4
 @media print{
   .rail-zone{display:none!important}
 }
+
+/* ===== Community Screensaver (Redesign prototype, 2026-11-05) =====
+   The ambient display: one county photo full-screen, crossfading
+   slowly through the community pool — the ONE place photo cycling
+   belongs (the page background stays calm). Clock + pinned answers
+   in across-the-room type over a directional scrim (portfolio
+   pattern: dark where the text sits, clear through the middle so
+   the photo carries). The glass here is deep-green in BOTH themes —
+   it always sits on a photograph; the theme still tints the card
+   and chips back on the page. */
+.saver-overlay{position:fixed;inset:0;z-index:1600;background:#0b120d;color:#f4f1e4;overflow:hidden;cursor:pointer;font-family:var(--font,inherit)}
+.saver-overlay[hidden]{display:none}
+.saver-photo{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2.8s ease}
+.saver-photo.is-on{opacity:1}
+.saver-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,16,10,.52) 0%,rgba(8,16,10,0) 26%,rgba(8,16,10,0) 52%,rgba(8,16,10,.78) 100%);pointer-events:none}
+.saver-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:20px 28px;z-index:3}
+.saver-brand{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:clamp(1rem,2.2vw,1.5rem);letter-spacing:.01em;text-shadow:0 1px 8px rgba(0,0,0,.55)}
+.saver-brand img{width:34px;height:34px;border-radius:50%}
+.saver-brand .live-word{color:var(--amber,#e9a44a)}
+.saver-live{display:inline-flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.14em;font-size:clamp(.8rem,1.6vw,1rem);color:#8fe3a8;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.saver-clockbox{position:absolute;top:12vh;left:0;right:0;text-align:center;z-index:3;padding:0 4vw}
+.saver-clock{font-family:var(--display);font-weight:700;font-size:clamp(4.2rem,15vw,11rem);line-height:.98;letter-spacing:-.01em;text-shadow:0 2px 26px rgba(0,0,0,.55),0 1px 4px rgba(0,0,0,.6)}
+.saver-date{margin-top:1.2vh;font-size:clamp(1.15rem,3.4vw,2.1rem);font-weight:600;color:#efe9d2;text-shadow:0 1px 10px rgba(0,0,0,.65)}
+.saver-answers{position:absolute;left:0;right:0;bottom:9.5vh;z-index:3;display:flex;flex-wrap:wrap;justify-content:center;gap:14px;padding:0 3.5vw}
+.saver-answer{flex:1 1 200px;max-width:340px;border-radius:18px;padding:14px 18px 12px;color:#f4f1e4;background:rgba(20,38,26,.55);border:1px solid rgba(244,241,228,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 14px 30px rgba(0,0,0,.35);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.saver-answer-label{display:flex;align-items:center;gap:8px;font-size:clamp(.78rem,1.7vw,.98rem);font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#f2c078}
+.saver-answer-label img{width:22px;height:22px;border-radius:50%}
+.saver-answer-val{margin-top:5px;font-family:var(--display);font-weight:700;font-size:clamp(1.45rem,3.6vw,2.5rem);line-height:1.12;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.saver-answer-sub{margin-top:4px;font-size:clamp(.85rem,1.9vw,1.05rem);color:#d8dfc8;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.saver-answer-none{max-width:520px;text-align:center}
+.saver-quiet{position:absolute;left:28px;bottom:22px;z-index:3;max-width:62vw;font-size:clamp(.85rem,1.8vw,1.05rem);color:#e6e0c8;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.saver-credit{position:absolute;right:28px;bottom:22px;z-index:3;color:rgba(255,250,238,.9);text-shadow:0 1px 12px rgba(6,16,9,.65),0 0 3px rgba(6,16,9,.5);text-align:right}
+/* the photographer's name as a signature on the painting —
+   small, handwritten, bottom corner (Travis, 2026-11-05) */
+.saver-credit-name{font-family:"Segoe Script","Brush Script MT","Snell Roundhand","Apple Chancery",cursive;font-size:1.35rem;line-height:1.1}
+.saver-credit-loc{font-size:.72rem;font-weight:600;letter-spacing:.04em;opacity:.85;margin-left:.45em}
+.saver-exit{position:absolute;top:64px;right:16px;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,20,13,.45);color:#fff;font-size:1.25rem;line-height:1;cursor:pointer;z-index:4}
+.saver-exit:hover{background:rgba(10,20,13,.7)}
+.saver-exit-hint{position:absolute;left:0;right:0;bottom:5.2vh;z-index:3;text-align:center;font-size:.95rem;letter-spacing:.06em;color:rgba(244,241,228,.85);text-shadow:0 1px 8px rgba(0,0,0,.7);transition:opacity 1.2s ease}
+.saver-exit-hint.dim{opacity:.3}
+body.saver-on{overflow:hidden}
+@media (max-width:640px){
+  .saver-top{padding:14px 16px}
+  .saver-clockbox{top:9vh}
+  .saver-answers{bottom:13vh;gap:10px;padding:0 4vw}
+  .saver-answer{flex:1 1 44%;max-width:none;padding:11px 13px 10px}
+  /* quiet line stays bottom-left; the signature lives bottom-right */
+  .saver-quiet{left:16px;bottom:48px;max-width:88vw}
+  .saver-credit{right:16px;bottom:16px;text-align:right}
+  .saver-credit-name{font-size:1.15rem}
+  .saver-exit-hint{display:none}
+  .saver-exit{top:58px;right:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .saver-photo{transition:none}
+  .saver-exit-hint{transition:none}
+}
+@media print{.saver-overlay{display:none!important}}
+
+/* the card + pin chips + photo form, back on the page */
+.saver-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:4px 0 6px}
+.saver-tip{flex:1 1 260px;margin:0;font-size:.92rem;color:var(--muted)}
+.saver-pins{display:flex;flex-wrap:wrap;gap:9px;margin:2px 0 8px}
+.saver-chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 14px 8px 9px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;color:var(--text);background:var(--panel-2);border:1.5px solid var(--border)}
+.saver-chip img{width:24px;height:24px;border-radius:50%}
+.saver-chip-state{font-size:.78rem;font-weight:800;letter-spacing:.04em;color:var(--muted)}
+.saver-chip.on{border-color:var(--amber,#e9a44a);background:rgba(233,164,74,.14);box-shadow:0 0 0 1px var(--amber,#e9a44a) inset}
+.saver-chip.on .saver-chip-state{color:var(--rust,#b0511c)}
+html[data-theme="dark"] .saver-chip.on .saver-chip-state{color:#f2c078}
+.photo-form{display:grid;gap:11px;margin-top:4px}
+.photo-field{display:grid;gap:5px;font-weight:700;font-size:.92rem}
+.photo-field input[type="text"]{font:inherit;font-weight:400;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.photo-field input[type="file"]{font:inherit;font-weight:400;font-size:.9rem}
+.photo-rights{display:flex;align-items:flex-start;gap:9px;font-size:.94rem;cursor:pointer}
+.photo-rights input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent)}
+.photo-submit{justify-self:start;text-decoration:none}
+.photo-submit.is-off{opacity:.45;filter:grayscale(.4)}
+
+/* pin toggles on the glance strip items (canonical tiles only — the
+   marquee clones' copies are display:none: unseen, untabbable) */
+.strip-item{position:relative}
+.saver-pin{position:absolute;top:2px;right:2px;z-index:3;width:26px;height:26px;border-radius:50%;border:1px solid rgba(244,241,228,.4);background:rgba(20,38,26,.45);font-size:.72rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.45;filter:grayscale(.7)}
+.saver-pin:hover{opacity:.9}
+.saver-pin.on{opacity:1;filter:none;background:rgba(233,164,74,.85);border-color:#f2c078}
+.strip-clone .saver-pin{display:none!important}
+.glance-strip.reduced .saver-pin{opacity:.75}

@@ -2900,6 +2900,47 @@ async function loadEvents() {
 }
 
 /* ---------- at a glance (synthesis strip) ---------- */
+/* The river tile leads with the TIDE (Travis, 2026-11-05): at a
+   glance it must say high / low / incoming in plain words, with the
+   Port Westward gauge level demoted to the sub-line. The tide state
+   comes from the same NOAA predictions the tides card loads
+   (tideData['9439201'], St. Helens) — never estimated here. Until
+   those land (or if they fail), the tile honestly carries the gauge
+   reading it always had. */
+let glanceGauge = null; // { h, arrow, glyph } from the USGS fetch below
+function glanceTideText() {
+  const preds = tideData['9439201'];
+  if (!preds || !preds.length) return null;
+  const now = Date.now();
+  const next = preds.find(p => p.t > now);
+  if (!next) return null;
+  const when = fmtTime(new Date(next.t));
+  const es = langCur === 'es';
+  if (next.t - now <= 30 * 60000) { // at the turn: name the tide itself
+    return (next.type === 'H'
+      ? (es ? 'Marea alta ' : 'High tide ')
+      : (es ? 'Marea baja ' : 'Low tide ')) + when + (es ? ' · ahora' : ' · now');
+  }
+  return next.type === 'H'
+    ? (es ? 'Marea entrante · Alta ' : 'Incoming tide · High ') + when
+    : (es ? 'Marea saliente · Baja ' : 'Outgoing tide · Low ') + when;
+}
+function updateGlanceRiver() {
+  const valEl = $('glance-river-val');
+  if (!valEl) return;
+  const subEl = $('glance-river-sub');
+  const es = langCur === 'es';
+  const tide = glanceTideText();
+  if (tide) {
+    valEl.textContent = tide;
+    if (subEl) subEl.textContent = glanceGauge
+      ? (es ? 'Río ' : 'River ') + num(glanceGauge.h, 2) + ' ft ' + glanceGauge.glyph + ' · Port Westward'
+      : 'St. Helens · NOAA';
+  } else if (glanceGauge) {
+    valEl.textContent = num(glanceGauge.h, 2) + ' ft' + glanceGauge.arrow;
+    if (subEl) subEl.textContent = es ? 'Medidor de Port Westward · USGS' : 'Port Westward gauge · USGS';
+  }
+}
 function todayStrPT() {
   return new Intl.DateTimeFormat('en-CA',
     { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -2939,7 +2980,8 @@ async function loadGlance() {
       clean.forEach(v => { const dd = Math.abs(new Date(v.dateTime).getTime() - target); if (dd < bd) { bd = dd; best = v; } });
       const delta = h - parseFloat(best.value);
       const arrow = delta > 0.05 ? ' ▲ rising' : delta < -0.05 ? ' ▼ falling' : ' → steady';
-      $('glance-river-val').textContent = num(h, 2) + ' ft' + arrow;
+      glanceGauge = { h: h, arrow: arrow, glyph: delta > 0.05 ? '▲' : delta < -0.05 ? '▼' : '→' };
+      updateGlanceRiver();
     }
   } catch (e) { /* keep placeholder */ }
   // Next event tile — from the events snapshot, FB events merged in
@@ -4126,6 +4168,7 @@ async function loadTides() {
   }));
   if (any) setUpdated('tides-updated');
   renderTides();
+  updateGlanceRiver(); // the glance tile leads with this same tide data
 }
 function renderTides() {
   const body = $('tides-body');
@@ -4168,7 +4211,7 @@ function renderTides() {
       + '<ul class="tide-turns">' + turns + '</ul></div>';
   }).join('');
 }
-function tickTides() { if (Object.keys(tideData).length) renderTides(); }
+function tickTides() { if (Object.keys(tideData).length) { renderTides(); updateGlanceRiver(); } }
 function initTides() {
   loadTides();
   setInterval(loadTides, 30 * 60 * 1000);
@@ -5547,7 +5590,7 @@ const LANG_ES = {
   glbridgesub: 'Puente Lewis &amp; Clark',
   glalerts: 'Alertas del clima',
   glalertssub: 'Servicio Meteorológico Nacional',
-  glriver: 'Río Columbia',
+  glriver: 'Río Columbia — Mareas',
   glriversub: 'Medidor de Port Westward · USGS',
   glevents: 'Próximo evento',
   finderhint: 'Una sola búsqueda en todas las tarjetas de esta página, los siete pueblos y los calendarios de eventos — toca un resultado y la página te lleva directo.',
@@ -6889,6 +6932,14 @@ const langSetSchoolsPrev = langSet;
 langSet = function (lang) {
   langSetSchoolsPrev(lang);
   renderSchools();
+};
+
+/* The river glance tile composes its tide-first text in JS, so
+   re-compose it when the language flips (same wrap pattern). */
+const langSetGlancePrev = langSet;
+langSet = function (lang) {
+  langSetGlancePrev(lang);
+  updateGlanceRiver();
 };
 
 /* ---------- Redesign prototype 2026-11-05: theme toggle wiring ----------

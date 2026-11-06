@@ -5275,6 +5275,7 @@ initWatch();
 const FINDER_SECTIONS = [
   { id: 'map',           title: 'Live map',                  sub: 'Radar, planes, ships, fires, the ISS — on one map', keys: 'map radar layers explore' },
   { id: 'roads-card',    title: 'US-30, the Bridge & Roads', sub: 'Commute verdict, bridge status, incidents, cameras', keys: 'bridge road highway us-30 commute drive driving closure closed traffic longview cameras detour cornelius pass' },
+  { id: 'drive-card',    title: 'Your Commute — drive times', sub: 'How long the drive takes, from your town to St. Johns, Portland or Longview', keys: 'commute drive time minutes how long portland st johns longview traffic trip' },
   { id: 'ships-card',    title: 'Columbia River Traffic',    sub: 'Ships under way on the river right now', keys: 'ship ships vessel ais river traffic boat freighter' },
   { id: 'ferry-card',    title: 'Oscar B Ferry',             sub: 'Next-boat countdown and the leave-by planner', keys: 'ferry boat oscar westport cathlamet puget island sailing crossing leave' },
   { id: 'events-card',   title: 'Events — Next Two Weeks',   sub: 'City and county calendars, with add-to-calendar', keys: 'events calendar meeting meetings library storytime tonight weekend happening' },
@@ -5639,6 +5640,10 @@ const LANG_ES = {
   tabmore: 'Eventos y más',
   commuteh2: '🚗 El veredicto del viaje',
   commutenote: 'La respuesta en una línea para manejar ahora mismo. El panorama completo del corredor — puente, incidentes y cámaras — está en la pestaña Viajes.',
+  driveh2: '🧭 Tu viaje — ¿cuánto dura el manejo?',
+  drivefrom: 'Desde',
+  driveto: 'Hasta',
+  drivenote: 'Tiempo típico — sin tráfico en vivo. El tiempo viene del servicio gratuito de rutas OSRM, recorriendo la ruta a las velocidades señaladas en condiciones normales — un cierre, una apertura del puente o un choque en la US-30 cambiarán el viaje real.',
   aircrafth2: '✈️ Aviones sobre el condado',
   aircraftnote: 'Aviones: receptores ADS-B de la comunidad vía adsb.fi. Se actualiza automáticamente.',
   __finderPh: 'Busca lo que sea — prueba «ferry», «marea alta», «hora de cuentos», un pueblo…',
@@ -5819,6 +5824,7 @@ const LANG_ES = {
   installp: 'Instalada, se abre en pantalla completa como una app — sin barra de direcciones, con su propio ícono y el condado a un toque. Gratis, y se sigue actualizando todo el día.',
   installcardbtn: '📱 Instalar la app',
   dwcommute: 'El veredicto del viaje',
+  dwdrive: 'Tu viaje — tiempos de manejo',
   dwgo: 'Antes de salir',
   dwplan: 'Esta noche y mañana',
   dwschools: 'Escuelas — cierres y retrasos',
@@ -6393,7 +6399,7 @@ window.CCLPins = {
    it is the page's anchor, and a Leaflet container does not need the
    adventure. */
 const PIN_CARDS = ['since-card', 'home-card', 'commute-card', 'go-card', 'plan-card', 'schools-card', 'briefing-card',
-  'roads-card', 'routeahead-card', 'ferry-card', 'ships-card', 'aircraft-card', 'bend-card',
+  'roads-card', 'drive-card', 'routeahead-card', 'ferry-card', 'ships-card', 'aircraft-card', 'bend-card',
   'alerts-card', 'forecast-card', 'sky-card', 'dark-card', 'rivers-card', 'tides-card',
   'fishpick-card', 'fish-card', 'tracker-card', 'steelhead-card', 'almanac-card',
   'quakes-card', 'fires-card', 'air-card',
@@ -8047,5 +8053,165 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
   if (mq) {
     if (mq.addEventListener) mq.addEventListener('change', apply);
     else if (mq.addListener) mq.addListener(apply);
+  }
+})();
+
+/* ---------- your commute: typical drive times (v9, 2026-11-05) ----------
+   Travis's last pre-ship addition: one card at the top of Travel —
+   right above the roads card and its My Route strip — answering
+   "how long's the drive?" for a pickable county town → a pickable
+   destination. St. Helens → St. Johns is the default pair, the one
+   he named. Routing is the free OSRM public service, fetched live
+   by the page itself (keyless, no fetcher involvement).
+   HONESTY (binding): OSRM drives the route at posted speeds in
+   free-flow conditions — the number is a TYPICAL drive, never a
+   live-traffic reading, and the card says so in both languages
+   ("Typical drive — no live traffic" / "Tiempo típico — sin
+   tráfico en vivo") directly under the answer.
+   Picks persist in localStorage ccl-commute-v1, and the last good
+   result per town pair is cached in the same store: a failed fetch
+   shows the cached reading with its own checked time instead of an
+   error, and only a pair with no cache at all shows the plain
+   couldn't-load line. Recomputed when the picks change, when the
+   Travel view opens (skipping a fetch whose cache is under five
+   minutes old), and once at load so a pinned copy on Today is
+   never stuck on the loading line. */
+(function () {
+  var DRIVE_KEY = 'ccl-commute-v1';
+  var FROM = [
+    { name: 'St. Helens', lat: 45.8597, lon: -122.8390 },
+    { name: 'Scappoose', lat: 45.7407, lon: -122.8776 },
+    { name: 'Columbia City', lat: 45.8901, lon: -122.8110 },
+    { name: 'Rainier', lat: 46.0896, lon: -122.9367 },
+    { name: 'Clatskanie', lat: 46.1033, lon: -123.2043 },
+    { name: 'Vernonia', lat: 45.8595, lon: -123.1901 }
+  ];
+  var TO = [
+    { name: 'St. Johns', es: 'St. Johns', lat: 45.5899, lon: -122.7543 },
+    { name: 'Downtown Portland', es: 'Centro de Portland', lat: 45.5152, lon: -122.6784 },
+    { name: 'Longview', es: 'Longview', lat: 46.1386, lon: -122.9544 }
+  ];
+  var TXT = {
+    en: { checking: 'Working out the drive…', checked: 'Checked', via: 'via', min: 'min', hr: 'hr', fail: "Couldn't load the drive time — try again in a bit" },
+    es: { checking: 'Calculando el viaje…', checked: 'Consultado', via: 'por', min: 'min', hr: 'h', fail: 'No se pudo cargar el tiempo de manejo — inténtalo de nuevo en un rato' }
+  };
+  var store = { from: 'St. Helens', to: 'St. Johns', cache: {} };
+  try {
+    var saved = JSON.parse(window.localStorage.getItem(DRIVE_KEY) || 'null');
+    if (saved) {
+      if (FROM.some(function (t) { return t.name === saved.from; })) store.from = saved.from;
+      if (TO.some(function (t) { return t.name === saved.to; })) store.to = saved.to;
+      if (saved.cache && typeof saved.cache === 'object') store.cache = saved.cache;
+    }
+  } catch (e) { /* storage blocked — the defaults still apply */ }
+  function save() { try { window.localStorage.setItem(DRIVE_KEY, JSON.stringify(store)); } catch (e) { /* non-fatal */ } }
+  function pairKey() { return store.from + '>' + store.to; }
+  function T() { return TXT[langCur === 'es' ? 'es' : 'en']; }
+  function escTxt(s) { return (typeof esc === 'function') ? esc(s) : s; }
+
+  var lastState = { kind: 'checking', entry: null };
+  var fetching = false;
+
+  function fmtDur(sec) {
+    var mins = Math.max(1, Math.round(sec / 60));
+    if (mins < 60) return '≈ ' + mins + ' ' + T().min;
+    var h = Math.floor(mins / 60), r = mins % 60;
+    return '≈ ' + h + ' ' + T().hr + (r ? ' ' + r + ' ' + T().min : '');
+  }
+  function fmtMi(m) {
+    var mi = m / 1609.344;
+    return (mi >= 10 ? String(Math.round(mi)) : mi.toFixed(1)) + ' mi';
+  }
+  function fmtAt(at) {
+    try { return new Date(at).toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit' }); }
+    catch (e) { return ''; }
+  }
+  function renderChips() {
+    var fb = document.getElementById('drive-from-chips');
+    var tb = document.getElementById('drive-to-chips');
+    if (fb) {
+      fb.innerHTML = FROM.map(function (t) {
+        return '<button class="drive-chip' + (t.name === store.from ? ' active' : '') + '" type="button" data-drive-from="' + t.name + '" aria-pressed="' + (t.name === store.from) + '">' + t.name + '</button>';
+      }).join('');
+      fb.querySelectorAll('[data-drive-from]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = b.getAttribute('data-drive-from');
+          if (store.from === v) return;
+          store.from = v; save(); renderChips(); refresh(true);
+        });
+      });
+    }
+    if (tb) {
+      tb.innerHTML = TO.map(function (t) {
+        var label = langCur === 'es' ? t.es : t.name;
+        return '<button class="drive-chip' + (t.name === store.to ? ' active' : '') + '" type="button" data-drive-to="' + t.name + '" aria-pressed="' + (t.name === store.to) + '">' + label + '</button>';
+      }).join('');
+      tb.querySelectorAll('[data-drive-to]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = b.getAttribute('data-drive-to');
+          if (store.to === v) return;
+          store.to = v; save(); renderChips(); refresh(true);
+        });
+      });
+    }
+  }
+  function renderBody() {
+    var body = document.getElementById('drive-body');
+    if (!body) return;
+    if (lastState.kind === 'ok' && lastState.entry) {
+      var e = lastState.entry;
+      var sub = fmtMi(e.m) + (e.via ? ' · ' + T().via + ' ' + escTxt(e.via) : '');
+      body.innerHTML = '<div class="drive-big">' + fmtDur(e.sec) + '</div>'
+        + '<div class="drive-sub">' + sub + '</div>'
+        + '<div class="drive-checked">' + T().checked + ' ' + fmtAt(e.at) + '</div>';
+    } else if (lastState.kind === 'fail') {
+      body.innerHTML = '<p class="drive-fail">' + T().fail + '</p>';
+    } else {
+      body.innerHTML = '<p class="loading">' + T().checking + '</p>';
+    }
+  }
+  function refresh(force) {
+    var key = pairKey();
+    var hit = store.cache[key];
+    if (!force && hit && (Date.now() - hit.at) < 5 * 60 * 1000) {
+      lastState = { kind: 'ok', entry: hit }; renderBody(); return;
+    }
+    if (hit) { lastState = { kind: 'ok', entry: hit }; renderBody(); }
+    else if (lastState.kind !== 'ok') { lastState = { kind: 'checking', entry: null }; renderBody(); }
+    if (fetching) return;
+    var f = FROM.filter(function (t) { return t.name === store.from; })[0] || FROM[0];
+    var t = TO.filter(function (x) { return x.name === store.to; })[0] || TO[0];
+    fetching = true;
+    var url = 'https://router.project-osrm.org/route/v1/driving/' + f.lon + ',' + f.lat + ';' + t.lon + ',' + t.lat + '?overview=false&steps=true';
+    fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      fetching = false;
+      var rt = d && d.routes && d.routes[0];
+      if (!rt || typeof rt.duration !== 'number') throw new Error('no route');
+      var summary = (rt.legs && rt.legs[0] && rt.legs[0].summary) || '';
+      var entry = { sec: rt.duration, m: rt.distance, via: summary.split(',')[0].trim(), at: Date.now() };
+      store.cache[key] = entry; save();
+      if (pairKey() === key) { lastState = { kind: 'ok', entry: entry }; renderBody(); }
+      else refresh(true); // the picks moved mid-flight — chase the new pair
+    }).catch(function () {
+      fetching = false;
+      if (pairKey() !== key) { refresh(true); return; }
+      var c = store.cache[key];
+      if (c) lastState = { kind: 'ok', entry: c };
+      else lastState = { kind: 'fail', entry: null };
+      renderBody();
+    });
+  }
+
+  renderChips();
+  refresh(false);
+  /* Recompute when the Travel view opens (same wrap discipline as
+     the langSet wraps: the original function runs first, untouched). */
+  if (typeof cclShowView === 'function') {
+    var prevShow = cclShowView;
+    cclShowView = function (name) { prevShow(name); if (name === 'travel') refresh(false); };
+  }
+  if (typeof langSet === 'function') {
+    var prevLang = langSet;
+    langSet = function (lang) { prevLang(lang); renderChips(); renderBody(); };
   }
 })();

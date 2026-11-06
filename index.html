@@ -400,6 +400,24 @@ document.documentElement.setAttribute("data-theme",t);})();
       </div>
     </div>
 
+    <div class="card" id="drive-card">
+      <div class="card-head">
+        <h2 data-i18n="driveh2">🧭 Your Commute — how long's the drive?</h2>
+      </div>
+      <div class="drive-controls">
+        <div class="drive-row">
+          <span class="drive-label" data-i18n="drivefrom">From</span>
+          <div class="drive-chips" id="drive-from-chips" role="group" aria-label="Where are you leaving from"></div>
+        </div>
+        <div class="drive-row">
+          <span class="drive-label" data-i18n="driveto">To</span>
+          <div class="drive-chips" id="drive-to-chips" role="group" aria-label="Where are you headed"></div>
+        </div>
+      </div>
+      <div id="drive-body" class="drive-body"><p class="loading">Working out the drive…</p></div>
+      <p class="card-note small" data-i18n="drivenote">Typical drive — no live traffic. The time comes from the free OSRM routing service, driving the route at posted speeds in normal conditions — a closure, a bridge lift, or a crash on US-30 will change the real trip.</p>
+    </div>
+
     <div class="card photo-card" id="roads-card">
       <div class="card-photo photo-pano"><img src="img/card-bridge-pano.jpg" alt="Panorama of the Lewis and Clark Bridge spanning the Columbia River between Rainier and Longview" loading="lazy" decoding="async"><img class="photo-night" src="img/dusk/roads-night.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"></div>
       <div class="card-head">
@@ -930,6 +948,7 @@ document.documentElement.setAttribute("data-theme",t);})();
     <div class="drawer-group">
       <button class="drawer-view" type="button" data-drawer-view="travel"><img src="img/icons/icon-travel.png" alt="" aria-hidden="true"><span data-i18n="tabtravel">Travel</span></button>
       <a class="drawer-link" href="#map-card" data-i18n="dwmap">The live map</a>
+      <a class="drawer-link" href="#drive-card" data-i18n="dwdrive">Your commute — drive times</a>
       <a class="drawer-link" href="#roads-card" data-i18n="dwroads">Roads &amp; the bridge</a>
       <a class="drawer-link" href="#routeahead-card" data-i18n="dwrouteahead">Route ahead</a>
       <a class="drawer-link" href="#ferry-card" data-i18n="dwferry">Oscar B ferry</a>

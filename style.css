@@ -2358,3 +2358,52 @@ html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:r
   .clock{font-size:1.02rem}
   .clock-label{font-size:.64rem}
 }
+
+
+/* ===== V9 (2026-11-05 — the commute card + Travis's desktop scroll
+   fix, from his photo of the preview mid-scroll) =====
+   On desktop the tab-pill row and the green "Live view" bar were
+   sticky: scrolled partway down, they stayed pinned at the top of
+   the viewport and content slid underneath them. Travis: "when I
+   scroll, all the stuff stays — you need to make it scroll too, on
+   the desktop version." So at ≥900px both bars give up their
+   stickiness and scroll away with the page — nothing at the top of
+   the desktop viewport stays pinned. The V8 hero treatment is
+   untouched: the tabbar keeps its −57px pull-up over the hero's
+   padding box (position:relative keeps its z-index over the
+   picture), it simply no longer sticks once you scroll past it.
+   Phones are untouched — their tab bar is bottom chrome, and their
+   green bar keeps its top stick as before.
+   The rail cards are the deliberate exception (Travis approved
+   their staying in view minutes before this note — persistent
+   visibility is the sponsor pitch). Their sticky offset was
+   112px to clear the two stuck bars; with the bars gone they ride
+   at 20px from the viewport top instead. */
+@media (min-width:900px){
+  .tabbar{position:relative}
+  .sticky-bar{position:static}
+}
+@media (min-width:1440px){
+  .rail-card{top:20px}
+}
+
+/* --- the commute card (Travel, above the roads card) --------------
+   Chips borrow the ferry planner's town-chip discipline; the
+   answer itself is one big display-serif reading, with the
+   distance/road line and the checked time under it. The card is
+   ordinary etched glass like its neighbours — no new treatment. */
+.drive-controls{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.drive-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.drive-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;min-width:42px}
+.drive-chips{display:flex;flex-wrap:wrap;gap:8px}
+.drive-chip{
+  background:var(--panel-2);color:var(--muted);border:1px solid var(--border);
+  border-radius:999px;padding:6px 14px;font-size:.85rem;cursor:pointer;font:inherit;
+  transition:background .15s ease,color .15s ease,border-color .15s ease;
+}
+.drive-chip:hover{color:var(--text);border-color:var(--accent)}
+.drive-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.drive-big{font-family:var(--display);font-size:2.3rem;font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.drive-sub{font-size:1rem;color:var(--text);margin-top:2px}
+.drive-checked{font-size:.78rem;color:var(--muted);margin-top:4px}
+.drive-fail{font-size:.95rem;line-height:1.5;margin:0}

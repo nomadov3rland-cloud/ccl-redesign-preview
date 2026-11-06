@@ -2471,7 +2471,8 @@ html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:r
 .cascade-promo:hover .cascade-title{text-decoration:underline}
 .cascade-promo:hover .cascade-cta{background:#f08212}
 .cascade-promo:focus-visible{outline:3px solid #f5a83d;outline-offset:-3px}
-.cascade-shot{flex:0 0 300px;width:300px;height:170px;object-fit:cover;object-position:top left;border-right:3px solid #e8760a}
+.cascade-pic{flex:0 0 300px;width:300px;height:170px;border-right:3px solid #e8760a}
+.cascade-shot{display:block;width:100%;height:100%;object-fit:cover;object-position:top left}
 .cascade-body{flex:1 1 auto;min-width:0;display:block;padding:14px 18px}
 .cascade-eyebrow{display:block;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#f5a83d;margin-bottom:5px}
 .cascade-title{display:block;font-family:var(--sans);font-size:1.22rem;font-weight:800;line-height:1.15;margin-bottom:5px;color:#fff}
@@ -2479,11 +2480,17 @@ html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:r
 .cascade-cta{display:inline-block;font-weight:800;color:#fff;background:#e8760a;padding:7px 14px;border-radius:8px}
 html[data-theme="dark"] .cascade-cta{color:#fff}
 @media (max-width:640px){
-  .cascade-shot{flex-basis:112px;width:112px;height:auto}
-  .cascade-body{padding:12px 14px}
-  .cascade-eyebrow{font-size:.68rem}
-  .cascade-title{font-size:1.05rem}
-  .cascade-copy{font-size:.88rem;line-height:1.35}
+  /* v38: phone gets the dedicated mobile title-card banner as a full-width
+     top strip (nothing cropped, title fully readable) over a slim body row —
+     the v37 112px side sliver sliced the title text and looked broken. */
+  .cascade-promo{flex-direction:column}
+  .cascade-pic{flex:none;width:100%;height:auto;border-right:none;border-bottom:3px solid #e8760a}
+  .cascade-shot{width:100%;height:auto;object-fit:initial}
+  .cascade-body{padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+  .cascade-eyebrow{font-size:.68rem;flex:1 1 100%;margin-bottom:2px}
+  .cascade-title{font-size:1.05rem;margin-bottom:0}
+  .cascade-copy{display:none}
+  .cascade-cta{margin-left:auto}
 }
 .cascade-drawer-link{font-size:.8rem;padding-top:1px;padding-bottom:1px;opacity:.72}
 .cascade-footer{margin:10px 0 4px}

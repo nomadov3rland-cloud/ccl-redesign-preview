@@ -2451,3 +2451,42 @@ html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:r
 /* --- 2 · marquee: hold the track on the compositor ---------------- */
 @keyframes stripScroll{to{transform:translate3d(-50%,0,0)}}
 .strip-track{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+
+/* =====================================================================
+   ===== V36 (2026-11-05 — Travis's directive) =====
+   Cross-promo for Cascade Controls Jobs, Nomad's other project.
+   Deliberately NOT sponsor styling: no founding/featured glass, no
+   sponsor language — a plain house card in the site's bone/forest/rust
+   palette, honestly labelled "our other project". Three spots: a
+   compact mini-card in Events & More (real screenshot of the Cascade
+   homepage as a small cropped thumbnail), a drawer entry, and a slim
+   footer link. Paid sponsor inventory is untouched.
+   V37 (Travis's feedback on v36): the card read like an entire page —
+   it is now a small horizontal advertisement like the little cards
+   sponsors pay for, and the drawer's separate "More from Nomad"
+   section is gone: Cascade is one tiny muted link under About.
+   ===================================================================== */
+.cascade-card{padding:0;overflow:hidden;background:linear-gradient(135deg,#1e4359,#132e47);border:1px solid #0d2237;box-shadow:0 10px 26px rgba(10,25,40,.35)}
+.cascade-promo{display:flex;align-items:stretch;text-decoration:none;color:#eef3f7}
+.cascade-promo:hover .cascade-title{text-decoration:underline}
+.cascade-promo:hover .cascade-cta{background:#f08212}
+.cascade-promo:focus-visible{outline:3px solid #f5a83d;outline-offset:-3px}
+.cascade-shot{flex:0 0 300px;width:300px;height:170px;object-fit:cover;object-position:top left;border-right:3px solid #e8760a}
+.cascade-body{flex:1 1 auto;min-width:0;display:block;padding:14px 18px}
+.cascade-eyebrow{display:block;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#f5a83d;margin-bottom:5px}
+.cascade-title{display:block;font-family:var(--sans);font-size:1.22rem;font-weight:800;line-height:1.15;margin-bottom:5px;color:#fff}
+.cascade-copy{display:block;font-size:.92rem;line-height:1.4;color:#c7d5e0;margin-bottom:10px}
+.cascade-cta{display:inline-block;font-weight:800;color:#fff;background:#e8760a;padding:7px 14px;border-radius:8px}
+html[data-theme="dark"] .cascade-cta{color:#fff}
+@media (max-width:640px){
+  .cascade-shot{flex-basis:112px;width:112px;height:auto}
+  .cascade-body{padding:12px 14px}
+  .cascade-eyebrow{font-size:.68rem}
+  .cascade-title{font-size:1.05rem}
+  .cascade-copy{font-size:.88rem;line-height:1.35}
+}
+.cascade-drawer-link{font-size:.8rem;padding-top:1px;padding-bottom:1px;opacity:.72}
+.cascade-footer{margin:10px 0 4px}
+.cascade-footer-link{display:inline-block;padding:9px 14px;border:1px solid var(--border);border-radius:999px;color:var(--accent-dark,#1e4228);text-decoration:none;font-weight:700;font-size:.92rem;background:rgba(46,93,58,.08)}
+.cascade-footer-link:hover{border-color:var(--warm,#b0511c);text-decoration:underline}
+html[data-theme="dark"] .cascade-footer-link{color:#bfe3c8;background:rgba(244,241,228,.06)}

@@ -5778,7 +5778,7 @@ const LANG_ES = {
   saverstart: '🖥️ Iniciar el protector de pantalla',
   savertip: '¿Lo vas a poner en un televisor o en una pantalla de oficina? Abre esta página con <strong>?display=1</strong> al final de la dirección y el protector de pantalla inicia solo — guarda esa dirección en el navegador del televisor y aparecerá sin más.',
   saverpinsh: 'Tus respuestas en la pantalla',
-  saverspinsp: 'Fija las respuestas que te importan — aquí, o con el 📌 pequeño en cada respuesta de la banda que pasa arriba. El protector de pantalla muestra tus fijadas, lo bastante grandes para leerse desde el otro lado del cuarto. Las fijadas se guardan solo en este aparato, y puedes cambiarlas cuando quieras.',
+  saverspinsp: 'Fija las respuestas que te importan con los botones de aquí abajo. El protector de pantalla muestra tus fijadas, lo bastante grandes para leerse desde el otro lado del cuarto. Las fijadas se guardan solo en este aparato, y puedes cambiarlas cuando quieras.',
   savershareh: 'Comparte tu foto del condado',
   saversharep: 'Las fotografías del protector de pantalla vienen del propio condado — y la tuya podría ser una de ellas. Envía una foto que hayas tomado en cualquier lugar del condado de Columbia y, una vez aprobada, se une al conjunto por el que pasan todos los protectores de pantalla, con tu nombre. Gratis, siempre.',
   savername: 'Tu nombre — aparecerá como el crédito de la foto',
@@ -7485,10 +7485,12 @@ langSet = function (lang) {
    the mode itself never opens a dialog, never asks a permission,
    never pops anything. Exit is any tap / click / keypress.
 
-   Pins: the four glance answers (bridge / tides / weather / next
-   event) carry a small 📌 toggle on the strip itself, the ferry joins
-   them from the intro card, and every answer also has a pin chip in
-   the Community Screensaver card on Events & More. Pins live in the
+   Pins: every answer (the four glance answers — bridge / tides /
+   weather / next event — plus the ferry) has a pin chip in the
+   Community Screensaver card on Events & More. (v8: the small 📌
+   toggles that used to ride the scrolling strip are REMOVED —
+   Travis found the amber pin discs on the marquee items ugly; the
+   card's chips are the one answer-pin control now.) Pins live in the
    GENERIC pin store (window.CCLPins, localStorage ccl-pins-v1) —
    one stored object, { cards: [...], answers: [...] } — because
    pins are a site-wide concept, not a screensaver one: Travis has
@@ -7497,7 +7499,7 @@ langSet = function (lang) {
    pinned cards there; the next pass unifies its toggles onto this
    store and reads store.cards). This module owns the answers half.
    Card heads carry the unified card pins (v5) — never saver pins —
-   and the strip/chips here carry the answer pins, so the two halves
+   and the saver card's chips carry the answer pins, so the two halves
    of the one store never collide on the same control.
 
    Photo pool: data/community-photos.json — { src, credit, location }
@@ -7624,11 +7626,6 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
             : (langCur === 'es' ? 'Fijar' : 'Pin')) + '</span></button>';
       }).join('');
     }
-    document.querySelectorAll('.saver-pin').forEach(function (b) {
-      var on = isPinned(b.getAttribute('data-saver-pin'));
-      b.classList.toggle('on', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
   }
   var chipsWrap = document.getElementById('saver-pins');
   if (chipsWrap) chipsWrap.addEventListener('click', function (ev) {
@@ -7636,29 +7633,15 @@ const PHOTO_FORM_URL = 'https://forms.gle/e1GU1qnuBKCM9KBk9'; // LIVE 2026-11-05
     if (b) togglePin(b.getAttribute('data-saver-chip'));
   });
 
-  /* pin toggles on the glance strip items themselves. The buttons ride
-     INSIDE the canonical tiles; the strip's clone sync copies tile
-     innerHTML into the marquee clones, so the CSS layer hides any
-     .saver-pin inside a .strip-clone (display:none — untabbable,
-     unclickable, unseen). Capture-phase click keeps a pin tap from
-     ever following the tile's link. */
-  var VAL_TO_ANSWER = { 'glance-bridge-val': 'bridge', 'glance-river-val': 'tides',
-    'glance-alerts-val': 'weather', 'glance-events-val': 'events' };
-  document.querySelectorAll('#strip-track > .glance-tile:not(.strip-clone)').forEach(function (tile) {
-    var val = tile.querySelector('.glance-val');
-    var aid = val ? VAL_TO_ANSWER[val.id] : null;
-    if (!aid) return;
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'saver-pin';
-    b.setAttribute('data-saver-pin', aid);
-    b.textContent = '📌';
-    tile.appendChild(b);
-    b.addEventListener('click', function (ev) {
-      ev.preventDefault(); ev.stopPropagation();
-      togglePin(aid);
-    }, true);
-  });
+  /* v8: NO pin toggles on the glance strip items. The strip used to
+     grow a small 📌 button inside each canonical tile (its marquee
+     clones hid their copies); Travis, reviewing the preview on his
+     phone, called the amber pin disc riding each scrolling item
+     ugly and unnecessary. The buttons are gone — originals and
+     clones alike carry only icon + label + value — and answer
+     pinning lives solely in the chips above (the screensaver card
+     on Events & More), writing the same store, feeding the same
+     saver stream. */
 
   /* ----- the photo pool ----- */
   var pool = FALLBACK_POOL, poolIdx = 0, frontIsA = true, fadeToken = 0;

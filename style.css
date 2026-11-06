@@ -2046,14 +2046,11 @@ html[data-theme="dark"] .saver-chip.on .saver-chip-state{color:#f2c078}
 .photo-submit{justify-self:start;text-decoration:none}
 .photo-submit.is-off{opacity:.45;filter:grayscale(.4)}
 
-/* pin toggles on the glance strip items (canonical tiles only — the
-   marquee clones' copies are display:none: unseen, untabbable) */
+/* v8: the glance strip items no longer carry pin toggles — the
+   .saver-pin disc rules that lived here are deleted with the
+   buttons themselves (app.js). Strip items are icon + label +
+   value only; answer pinning lives in the saver card's chips. */
 .strip-item{position:relative}
-.saver-pin{position:absolute;top:2px;right:2px;z-index:3;width:26px;height:26px;border-radius:50%;border:1px solid rgba(244,241,228,.4);background:rgba(20,38,26,.45);font-size:.72rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.45;filter:grayscale(.7)}
-.saver-pin:hover{opacity:.9}
-.saver-pin.on{opacity:1;filter:none;background:rgba(233,164,74,.85);border-color:#f2c078}
-.strip-clone .saver-pin{display:none!important}
-.glance-strip.reduced .saver-pin{opacity:.75}
 
 /* ===== V5 REVISION (Travis's fixes on v4 + screensaver, 2026-11-05) =====
    Clean hero, the logo becomes the menu button, a slide-out drawer,
@@ -2294,3 +2291,70 @@ html[data-theme="dark"] .featured-local.photo-behind .featured-card{background:r
   .hero-side .hero-theme-btn .theme-ico{width:22px;height:22px}
 }
 
+
+/* ===== V8 REVISION (Travis, 2026-11-05 — from his desktop + phone
+   photos of the preview) =====
+   (1) The hero photo runs CONTINUOUS to the green sticky bar on
+   desktop — the bone tab-bar band is gone; the tab pills float
+   over the picture in dark glass. (2) The masthead pills slim
+   down on wider screens. (The strip pin-disc removal is app.js +
+   the deleted .saver-pin rules above; the rails needed no change
+   — already sticky, proven with a two-depth geometry probe.)
+
+/* --- 1 · hero photo to the green bar (desktop tab row only) --------
+   The tabbar is a 57px sticky row directly after the hero. The
+   hero gains exactly that much bottom padding (photo + scrim fill
+   the padding box) and the tabbar pulls up over it with a matching
+   negative margin, its band made transparent — the bridge picture
+   now runs unbroken from the top of the page to the green "Live
+   view" bar, and the four tab pills float on it in the same dark
+   glass as the masthead pills. When the row sticks during scroll
+   the pills keep their own blurred glass, so labels read over
+   whatever passes beneath. Phones are untouched: their tab bar is
+   bottom chrome, and their hero already meets the green bar
+   directly. */
+@media (min-width:900px){
+  .hero{padding-bottom:57px;border-bottom:none}
+  .tabbar{
+    margin-top:-57px;background:transparent;border-bottom:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+  html[data-theme="dark"] .tabbar{background:transparent}
+  .tab-btn{
+    background:rgba(13,26,17,.52);color:#f2eedd;
+    border-color:rgba(255,255,255,.28);
+    -webkit-backdrop-filter:blur(10px) saturate(1.2);
+    backdrop-filter:blur(10px) saturate(1.2);
+    box-shadow:0 3px 12px rgba(6,14,8,.38);
+    text-shadow:0 1px 6px rgba(0,0,0,.5);
+  }
+  .tab-btn:hover{background:rgba(13,26,17,.74);color:#fff}
+  .tab-btn.active{
+    background:var(--accent);color:#fff;border-color:rgba(255,255,255,.4);
+    box-shadow:0 4px 14px rgba(6,14,8,.45);
+  }
+}
+@media (min-width:900px) and (prefers-reduced-transparency:reduce){
+  /* no glass under reduced transparency: solid deep-green pills,
+     the row itself stays clear of the photo */
+  .tab-btn{-webkit-backdrop-filter:none;backdrop-filter:none;background:#20392a}
+  .tab-btn.active{background:var(--accent)}
+}
+@media (min-width:900px) and (prefers-contrast:more){
+  .tab-btn{border-color:rgba(255,255,255,.65)}
+}
+
+/* --- 2 · slimmer masthead pills (wider screens) --------------------
+   Travis: the desktop Display / Dark / clock pills are still
+   chunky. Padding and type come down ~25–30%; labels stay, and
+   the buttons keep a clear 40px minimum height. The ≤560px
+   circular icon buttons (v7) live in their own media block and
+   are untouched. */
+@media (min-width:561px){
+  .hero-side{gap:8px}
+  .hero-theme-btn{padding:7px 12px;font-size:.85rem;min-height:40px;gap:6px}
+  .hero-theme-btn .theme-ico{width:19px;height:19px}
+  .header-clock{padding:5px 10px}
+  .clock{font-size:1.02rem}
+  .clock-label{font-size:.64rem}
+}
